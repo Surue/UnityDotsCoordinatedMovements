@@ -8,21 +8,26 @@ public class PathFollowSystem : ComponentSystem
     protected override void OnUpdate()
     {
         //Dynamic buffer must be at the start
-        Entities.ForEach((DynamicBuffer<PathPositions> pathPositionBuffer, ref PathFollow pathFollow, ref Translation position, ref PhysicsVelocity velocity) =>
+        Entities.ForEach((DynamicBuffer<PathPositions> pathPositionBuffer, ref PathFollow pathFollow, ref Translation position, ref DesiredVelocity velocity) =>
         {
             if (pathFollow.pathPositionIndex >= 0)
-            {    
-                float3 targetPosition = new float3(pathPositionBuffer[pathFollow.pathPositionIndex].position.x, 0, pathPositionBuffer[pathFollow.pathPositionIndex].position.y);
+            {
+                float2 targetPosition = pathPositionBuffer[pathFollow.pathPositionIndex].position;
+                float2 pos = new float2(position.Value.x, position.Value.z);
                 
-                float3 direction = math.normalizesafe(targetPosition - position.Value);
+                float2 direction = math.normalizesafe(targetPosition - pos);
                 float moveSpeed = 3;
                 
-                velocity.Linear = direction * moveSpeed;
+                velocity.desiredVelocity = direction * moveSpeed;
                 
-                if (math.distance(new float2(position.Value.x, position.Value.z), pathPositionBuffer[pathFollow.pathPositionIndex].position) < 0.1f)
+                if (math.distance(pos, pathPositionBuffer[pathFollow.pathPositionIndex].position) < 0.1f)
                 {
                     pathFollow.pathPositionIndex--;
                 }
+            }
+            else
+            {
+                velocity.desiredVelocity = float2.zero;
             }
         });
     }
