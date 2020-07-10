@@ -11,7 +11,7 @@ public class MovementSystem : SystemBase
     {
         float dt = UnityEngine.Time.deltaTime;
         
-        Entities.ForEach((ref Translation translation, ref Rotation rotation, in DesiredVelocity velocity) =>
+        Entities.ForEach((ref Translation translation, ref Rotation rotation, in Velocity velocity) =>
         {
             float2 normalizedVel = math.normalizesafe(velocity.Value);
             translation.Value += new float3(normalizedVel.x, 0, normalizedVel.y) * dt;

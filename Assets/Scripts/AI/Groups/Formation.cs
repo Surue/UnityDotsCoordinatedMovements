@@ -1,7 +1,9 @@
-﻿using Unity.Mathematics;
+﻿using Unity.Entities;
+using Unity.Mathematics;
 using UnityEngine;
 
-public struct Formation {
+[GenerateAuthoringComponent]
+public struct Formation : IComponentData {
     public enum State : short{
         FORMING,
         FORMED,
@@ -13,7 +15,6 @@ public struct Formation {
         SQUARE
     }
     
-    public int ID;
     public State state;
     public Shape shape;
     public float speedForming;
