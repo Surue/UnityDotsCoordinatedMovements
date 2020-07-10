@@ -2,5 +2,5 @@
 
 [GenerateAuthoringComponent]
 public struct PathFollow : IComponentData {
-    public int pathPositionIndex;
+    public int Value;
 }

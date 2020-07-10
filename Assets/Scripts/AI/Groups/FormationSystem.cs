@@ -42,7 +42,7 @@ public class FormationSystem : SystemBase {
     {
 
 
-        Entities.WithStructuralChanges().ForEach((Entity entity, ref FormationID formationId, ref PathFollow pathFollow, ref Translation translation, ref DesiredVelocity desiredVelocity) =>
+        Entities.WithStructuralChanges().ForEach((Entity entity, DynamicBuffer<PathPositions> pathPositionBuffer, ref TargetPosition targetPosition, ref FormationID formationId, ref PathFollow pathFollow, ref Translation translation, ref DesiredVelocity desiredVelocity) =>
         {
             //Check if entity is referential for the group
             //TODO This part can be put out and can even be parallelisezd
@@ -51,48 +51,53 @@ public class FormationSystem : SystemBase {
                 var group = formations_[formationId.formationIndex];
                 //Update position and forward
                 group.referentialPosition = new float2(translation.Value.x, translation.Value.z);
-                float2 vel = EntityManager.GetComponentData<DesiredVelocity>(entity).Value;
 
-                if (math.lengthsq(vel) > 0)
-                {
-                    group.referentialForward = vel;
-                }
-                else
-                {
-                    group.referentialForward = EntityManager.GetComponentData<LocalToWorld>(entity).Forward.xz;
-                }
-                group.referentialForward = EntityManager.GetComponentData<DesiredVelocity>(entity).Value;
+                group.referentialForward = EntityManager.GetComponentData<LocalToWorld>(entity).Forward.xz;
 
                 formations_[formationId.formationIndex] = group;
+
+                if (pathFollow.Value != -1)
+                {
+                    targetPosition.Value = pathPositionBuffer[pathFollow.Value].Value;
+                }
             }
             else
             {
                 //Get target position
-                float2 targetPosition = formations_[formationId.formationIndex].GetTargetPosition(formationId.positionIndex);
+                float2 tmpPosition = formations_[formationId.formationIndex].GetTargetPosition(formationId.positionIndex);
 
                 //Check distance 
-                float distanceToTarget =
-                    math.distance(new float2(translation.Value.x, translation.Value.z), targetPosition);
+                float distanceToTarget = math.distance(translation.Value.xz, tmpPosition);
 
                 if (distanceToTarget > formations_[formationId.formationIndex].separatedDistance)
                 {
-                    if (EntityManager.HasComponent<PathFindingRequest>(entity))
+                    if (pathFollow.Value != -1)
                     {
+                        targetPosition.Value = pathPositionBuffer[pathFollow.Value].Value;
                         
+                        //If distance between and path and real position is too big ask a new path
+                        if (math.distance(pathPositionBuffer[0].Value, tmpPosition) > formations_[formationId.formationIndex].separatedDistance)
+                        {
+                            EntityManager.AddComponentData(entity, new PathFindingRequest()
+                            {
+                                startPos = translation.Value.xz,
+                                endPos = tmpPosition
+                            });
+                        }
                     }
                     else
                     {
-                        //TODO update pathfinding request only when needed
                         EntityManager.AddComponentData(entity, new PathFindingRequest()
                         {
-                            startPos = new float2(translation.Value.x, translation.Value.z),
-                            endPos = targetPosition
+                            startPos = translation.Value.xz,
+                            endPos = tmpPosition
                         });
                     }
                 }
                 else
                 {
-                    desiredVelocity.Value = targetPosition - new float2(translation.Value.x, translation.Value.z);
+                    targetPosition.Value = tmpPosition;
+                    pathFollow.Value = -1;
                 }
             }
         }).Run();
