@@ -3,5 +3,5 @@ using Unity.Mathematics;
 
 [GenerateAuthoringComponent]
 public struct DesiredVelocity : IComponentData {
-    public float2 desiredVelocity;
+    public float2 Value;
 }

@@ -18,16 +18,17 @@ public class PathFollowSystem : ComponentSystem
                 float2 direction = math.normalizesafe(targetPosition - pos);
                 float moveSpeed = 3;
                 
-                velocity.desiredVelocity = direction * moveSpeed;
+                velocity.Value = direction * moveSpeed;
                 
                 if (math.distance(pos, pathPositionBuffer[pathFollow.pathPositionIndex].position) < 0.1f)
                 {
                     pathFollow.pathPositionIndex--;
+
+                    if (pathFollow.pathPositionIndex == -1)
+                    {
+                        velocity.Value = float2.zero;
+                    }
                 }
-            }
-            else
-            {
-                velocity.desiredVelocity = float2.zero;
             }
         });
     }
