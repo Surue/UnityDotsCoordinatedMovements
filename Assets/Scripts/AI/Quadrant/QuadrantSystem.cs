@@ -2,6 +2,7 @@
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using UnityEditor;
 using UnityEngine;
 
 public struct NeighborData {
@@ -53,6 +54,14 @@ public class QuadrantSystem : SystemBase
     }
 
     public static int GetPositionHashMapKey(float3 pos) {
-        return (int)(math.floor(pos.x / quadrantCellSize)) + (int)(quadrantYMultiplier * math.floor(pos.z / quadrantCellSize));
+        return (int)math.floor(pos.x / quadrantCellSize) + (int)(quadrantYMultiplier * math.floor(pos.z / quadrantCellSize));
+    }
+    
+    public static void DebugDrawQuadrant(float3 pos) {
+        Vector3 lowerLeft = new Vector3((math.floor(pos.x / quadrantCellSize)) * quadrantCellSize, 0, math.floor(pos.z / quadrantCellSize) * quadrantCellSize);
+        Debug.DrawLine(lowerLeft, lowerLeft + new Vector3(1, 0, 0) * quadrantCellSize);
+        Debug.DrawLine(lowerLeft, lowerLeft + new Vector3(0, 0, 1) * quadrantCellSize);
+        Debug.DrawLine(lowerLeft + new Vector3(1, 0, 0) * quadrantCellSize, lowerLeft + new Vector3(1, 0, 1) * quadrantCellSize);
+        Debug.DrawLine(lowerLeft + new Vector3(0, 0, 1) * quadrantCellSize, lowerLeft + new Vector3(1, 0, 1) * quadrantCellSize);
     }
 }
