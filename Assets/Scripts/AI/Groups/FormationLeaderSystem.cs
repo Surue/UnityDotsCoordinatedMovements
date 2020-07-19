@@ -2,6 +2,7 @@
 using Unity.Entities;
 using Unity.Transforms;
 
+[UpdateAfter(typeof(FormationRegisterSystem))]
 public class FormationLeaderSystem : SystemBase{
     protected override void OnUpdate()
     {
