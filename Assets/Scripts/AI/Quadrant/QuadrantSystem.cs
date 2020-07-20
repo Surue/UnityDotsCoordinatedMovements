@@ -64,4 +64,73 @@ public class QuadrantSystem : SystemBase
         Debug.DrawLine(lowerLeft + new Vector3(1, 0, 0) * quadrantCellSize, lowerLeft + new Vector3(1, 0, 1) * quadrantCellSize);
         Debug.DrawLine(lowerLeft + new Vector3(0, 0, 1) * quadrantCellSize, lowerLeft + new Vector3(1, 0, 1) * quadrantCellSize);
     }
+
+    public static NativeList<int> GetCurrentCellAndNeighborsKeys(float3 pos)
+    {
+        int currentKey = GetPositionHashMapKey(pos);
+        
+        NativeList<int> neighborsKeys = new NativeList<int>(Allocator.Temp);
+        neighborsKeys.Add(currentKey);
+
+        float3 lowerLeft = new float3((math.floor(pos.x / quadrantCellSize)) * quadrantCellSize, 0, math.floor(pos.z / quadrantCellSize) * quadrantCellSize);
+        float3 topRight = lowerLeft + new float3(1, 0, 1) * quadrantCellSize;
+        
+        //Check bottom
+        bool bottom = false;
+        if (math.length(math.cross(new float3(1, 0, 0), pos - lowerLeft)) < 3)
+        {
+            neighborsKeys.Add(currentKey - quadrantYMultiplier);
+            bottom = true;
+        } 
+        
+        //Check left
+        bool left = false;
+        if (math.length(math.cross(new float3(0, 0, 1), pos - lowerLeft)) < 3)
+        {
+            neighborsKeys.Add(currentKey - 1);
+            left = true;
+        } 
+        
+        //Check top
+        bool top = false;
+        if (math.length(math.cross(new float3(1, 0, 0), pos - topRight)) < 3)
+        {
+            neighborsKeys.Add(currentKey + quadrantYMultiplier);
+            top = true;
+        } 
+        
+        //Check right
+        bool right = false;
+        if (math.length(math.cross(new float3(0, 0, 1), pos - topRight)) < 3)
+        {
+            neighborsKeys.Add(currentKey + 1);
+            right = true;
+        } 
+        
+        //Check bottomLeft
+        if (bottom && left)
+        {
+            neighborsKeys.Add(currentKey - quadrantYMultiplier - 1);
+        }
+        
+        //Check topLeft
+        if (top && left)
+        {
+            neighborsKeys.Add(currentKey + quadrantYMultiplier - 1);
+        }
+        
+        //Check bottomRight
+        if (bottom && right)
+        {
+            neighborsKeys.Add(currentKey - quadrantYMultiplier + 1);
+        }
+        
+        //Check bottomRight
+        if (top && right)
+        {
+            neighborsKeys.Add(currentKey + quadrantYMultiplier + 1);
+        }
+        
+        return neighborsKeys;
+    }
 }
