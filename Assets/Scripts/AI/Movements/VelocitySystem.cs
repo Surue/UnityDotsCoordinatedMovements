@@ -1,7 +1,9 @@
 ﻿using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using UnityEngine;
 
+[UpdateAfter(typeof(QuadrantSystem))]
 public class VelocitySystem : SystemBase
 {
     protected override void OnUpdate()
@@ -13,8 +15,6 @@ public class VelocitySystem : SystemBase
         Entities.ForEach((ref Velocity vel, in TargetPosition targetPosition, in Translation translation) =>
         {
             float dist = math.distance(translation.Value.xz, targetPosition.Value);
-
-            float currentSpeed = 5;
             
             if (dist < stoppingDistance)
             {
@@ -23,7 +23,7 @@ public class VelocitySystem : SystemBase
             else
             {
                 float2 dir = math.normalizesafe(targetPosition.Value - translation.Value.xz);
-                vel.Value = dir * math.min(1, dist / slowdownDistance) * currentSpeed ;
+                vel.Value = dir * math.min(1, dist / slowdownDistance) * vel.maxSpeed;
             }
         }).ScheduleParallel();
     }

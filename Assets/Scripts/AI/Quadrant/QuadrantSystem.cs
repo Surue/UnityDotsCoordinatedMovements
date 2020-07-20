@@ -2,7 +2,6 @@
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEditor;
 using UnityEngine;
 
 public struct NeighborData {
@@ -50,7 +49,7 @@ public class QuadrantSystem : SystemBase
         {
             int hashMapKey = GetPositionHashMapKey(translation.Value);
             quadrantMultiHashMap.Add(hashMapKey, new NeighborData(new float2(translation.Value.x, translation.Value.z), velocity.Value));
-        }).Schedule();
+        }).Run();
     }
 
     public static int GetPositionHashMapKey(float3 pos) {

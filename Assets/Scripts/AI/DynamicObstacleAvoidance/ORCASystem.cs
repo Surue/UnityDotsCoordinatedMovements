@@ -44,7 +44,7 @@ public class ORCASystem : SystemBase {
 
                 quadrantKeys = QuadrantSystem.GetCurrentCellAndNeighborsKeys(translation.Value);
 
-                QuadrantSystem.DebugDrawQuadrant(translation.Value);
+                // QuadrantSystem.DebugDrawQuadrant(translation.Value);
 
                 //ORCA setup
                 NativeList<Line> orcaLines = new NativeList<Line>(Allocator.Temp);
@@ -111,8 +111,8 @@ public class ORCASystem : SystemBase {
                 {
                     AgentNeighbor otherAgent = agentNeighbors[i].Value;
 
-                    Debug.DrawLine(translation.Value,
-                        new Vector3(otherAgent.position.x, translation.Value.y, otherAgent.position.y));
+                    // Debug.DrawLine(translation.Value,
+                    //     new Vector3(otherAgent.position.x, translation.Value.y, otherAgent.position.y));
                     
                     float2 relativePosition = otherAgent.position - translation.Value.xz;
                     float2 relativeVelocity = velocity.Value - otherAgent.velocity;
@@ -195,7 +195,7 @@ public class ORCASystem : SystemBase {
                 agentNeighbors.Dispose();
 
                 quadrantKeys.Dispose();
-            }).Run();
+            }).ScheduleParallel();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

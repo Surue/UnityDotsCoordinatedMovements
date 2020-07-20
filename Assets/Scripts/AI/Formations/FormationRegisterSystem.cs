@@ -4,6 +4,8 @@ public class FormationRegisterSystem : SystemBase{
     protected override void OnUpdate()
     {
         EntityManager em = EntityManager;
+        
+        //TODO To parallel
         Entities.WithStructuralChanges().ForEach((Entity entity, FormationRegisterTag registerRequest, FormationLeader leader)=>
         {
             //Update the formation
@@ -14,6 +16,7 @@ public class FormationRegisterSystem : SystemBase{
             em.RemoveComponent<FormationRegisterTag>(entity);
         }).Run();
         
+        //TODO To parallel
         Entities.WithStructuralChanges().ForEach((Entity entity, FormationRegisterTag registerRequest, FormationFollower follower)=>
         {
             //Update the formation

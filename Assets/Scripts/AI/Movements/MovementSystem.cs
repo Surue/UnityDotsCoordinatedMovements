@@ -15,11 +15,11 @@ public class MovementSystem : SystemBase
         Entities.ForEach((ref Translation translation, ref Rotation rotation, in Velocity velocity) =>
         {
             float2 normalizedVel = math.normalizesafe(velocity.Value);
-            translation.Value += new float3(normalizedVel.x, 0, normalizedVel.y) * dt;
+            translation.Value += new float3(velocity.Value.x, 0, velocity.Value.y) * dt;
 
             if (math.lengthsq(velocity.Value) > 0.1f)
             {
-                rotation.Value = quaternion.LookRotationSafe(new float3(normalizedVel.x, 0, normalizedVel.y),
+                rotation.Value = quaternion.LookRotationSafe(new float3(velocity.Value.x, 0, velocity.Value.y),
                     new float3(0, 1, 0));
             }
         }).ScheduleParallel();

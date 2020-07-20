@@ -40,12 +40,12 @@ public struct Formation : IComponentData {
                 }
                 else
                 {
-                    return referentialPosition - new float2(referentialForward.y, -referentialForward.x) * (Mathf.CeilToInt(index / 2.0f) * agentSpacing);
+                    return referentialPosition - new float2(referentialForward.y, -referentialForward.x) * (math.ceil(index / 2.0f) * agentSpacing);
                 }
             case Shape.COLUMN:
                 return referentialPosition - referentialForward * index * agentSpacing;
             case Shape.SQUARE:
-                int maxCol = Mathf.FloorToInt(Mathf.Sqrt(nbAgent));
+                int maxCol = (int)math.floor(math.sqrt(nbAgent));
 
                 int col = index % maxCol;
                 int row = index / maxCol;
@@ -59,7 +59,7 @@ public struct Formation : IComponentData {
                 else
                 {
                     return referentialPosition - 
-                           new float2(referentialForward.y, -referentialForward.x) * (Mathf.CeilToInt(col / 2.0f) * agentSpacing) -
+                           new float2(referentialForward.y, -referentialForward.x) * (math.ceil(col / 2.0f) * agentSpacing) -
                            referentialForward * (row * agentSpacing);
                 }
             default:

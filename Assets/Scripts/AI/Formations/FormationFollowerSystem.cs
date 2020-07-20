@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
@@ -29,12 +30,24 @@ public class FormationFollowerSystem : SystemBase {
         
         NativeList<PairEntityFormation> formations = new NativeList<PairEntityFormation>(Allocator.TempJob);
         
+        //TODO To parallel, Use chunk to bind entity to formation
         Entities.ForEach((Entity entity, in Formation formation) =>
         {
             formations.Add(new PairEntityFormation()
             {
                 entity = entity,
-                formation = formation
+                formation = new Formation()
+                {
+                    agentSpacing = formation.agentSpacing,
+                    nbAgent = formation.nbAgent,
+                    referentialForward = formation.referentialForward,
+                    referentialPosition = formation.referentialPosition,
+                    separatedDistance = formation.separatedDistance,
+                    shape = formation.shape,
+                    speedFormed = formation.speedFormed,
+                    speedForming = formation.speedForming,
+                    state = Formation.State.FORMED
+                }
             });
         }).Schedule();
         
@@ -44,7 +57,6 @@ public class FormationFollowerSystem : SystemBase {
             DynamicBuffer<PathPositions> pathPositionBuffer, 
             ref TargetPosition targetPosition, 
             ref PathFollow pathFollow, 
-            ref Velocity desiredVelocity,
             in Translation translation, 
             in FormationFollower follower) =>
         {
@@ -55,6 +67,7 @@ public class FormationFollowerSystem : SystemBase {
                 if (formations[i].entity == follower.formationEntity)
                 {
                     formation = formations[i].formation;
+                    break;
                 }
             }
             
@@ -98,6 +111,64 @@ public class FormationFollowerSystem : SystemBase {
             }
         }).ScheduleParallel();
         
+        //TODO Must be parallelized
+        //Define if formation are forming or formed
+        Entities.ForEach((
+            in PathFollow pathFollow, 
+            in FormationFollower follower) =>
+        {
+
+            //Get target position
+            if (pathFollow.Value != -1)
+            {
+                    
+                //Get Formation
+                Formation formation = new Formation();
+                int i;
+                for (i = 0; i < formations.Length; i++)
+                {
+                    if (formations[i].entity == follower.formationEntity)
+                    {
+                        formation = formations[i].formation;
+                        break;
+                    }
+                }
+
+                formation.state = Formation.State.FORMING;
+                formations[i] = new PairEntityFormation()
+                {
+                    entity = formations[i].entity,
+                    formation = formation
+                };
+            }
+        }).Run();
+        
+        //Set speed for leader
+        Entities.WithReadOnly(formations).ForEach((
+            ref Velocity velocity,
+            in FormationLeader leader) =>
+        {
+            //Get Formation
+            Formation formation = new Formation();
+            for (int i = 0; i < formations.Length; i++)
+            {
+                if (formations[i].entity == leader.formationEntity)
+                {
+                    formation = formations[i].formation;
+                    break;
+                }
+            }
+
+            if (formation.state == Formation.State.FORMED)
+            {
+                velocity.maxSpeed = formation.speedFormed;
+            }
+            else
+            {
+                velocity.maxSpeed = formation.speedForming;
+            }
+        }).ScheduleParallel();
+
         Dependency = JobHandle.CombineDependencies(Dependency, formations.Dispose(Dependency));
         
         ecbSystem.AddJobHandleForProducer(Dependency);
