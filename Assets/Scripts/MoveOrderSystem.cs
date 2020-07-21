@@ -1,10 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Unity.Entities;
+﻿using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
-using UnityEngine.Assertions.Must;
 
 public class MoveOrderSystem : ComponentSystem
 {
@@ -17,7 +14,7 @@ public class MoveOrderSystem : ComponentSystem
             {
                 float2 worldPos = new float2(hit.point.x, hit.point.z);
 
-                Entities.ForEach((Entity entity, ref Translation translation) =>
+                Entities.ForEach((Entity entity, ref Translation translation, ref FormationLeader leader) =>
                 {
                     EntityManager.AddComponentData(entity, new PathFindingRequest()
                     {
