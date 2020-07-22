@@ -141,7 +141,7 @@ GameObject:
   - component: {fileID: 22535286}
   - component: {fileID: 22535287}
   m_Layer: 0
-  m_Name: Agent (5)
+  m_Name: AgentFollower
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -335,7 +335,7 @@ GameObject:
   - component: {fileID: 103086050}
   - component: {fileID: 103086051}
   m_Layer: 0
-  m_Name: Agent (1)
+  m_Name: AgentFollower
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -529,7 +529,7 @@ GameObject:
   - component: {fileID: 124554311}
   - component: {fileID: 124554312}
   m_Layer: 0
-  m_Name: Agent
+  m_Name: AgentLeader
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -723,7 +723,7 @@ GameObject:
   - component: {fileID: 128055431}
   - component: {fileID: 128055432}
   m_Layer: 0
-  m_Name: Agent (3)
+  m_Name: AgentFollower
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1056,7 +1056,7 @@ GameObject:
   - component: {fileID: 305994194}
   - component: {fileID: 305994195}
   m_Layer: 0
-  m_Name: Agent (4)
+  m_Name: AgentFollower
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1868,7 +1868,7 @@ GameObject:
   - component: {fileID: 1567000017}
   - component: {fileID: 1567000018}
   m_Layer: 0
-  m_Name: Agent (6)
+  m_Name: AgentFollower
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2062,7 +2062,7 @@ GameObject:
   - component: {fileID: 1630939343}
   - component: {fileID: 1630939344}
   m_Layer: 0
-  m_Name: Agent (2)
+  m_Name: AgentFollower
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

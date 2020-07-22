@@ -15,6 +15,7 @@ public struct NeighborData {
     public float2 velocity;
 }
 
+[UpdateAfter(typeof(FormationSetupSystem))]
 public class QuadrantSystem : SystemBase
 {
     public static NativeMultiHashMap<int, NeighborData> quadrantMultiHashMap;
