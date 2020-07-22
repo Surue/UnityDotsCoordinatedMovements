@@ -7,7 +7,7 @@ public class FormationLeaderSystem : SystemBase{
     protected override void OnUpdate()
     {
         EntityManager em = EntityManager;
-        Entities.WithStructuralChanges().ForEach((DynamicBuffer<PathPositions> pathPositionBuffer, ref TargetPosition targetPosition, in PathFollow pathFollow, in FormationLeader leader, in LocalToWorld localToWorld) =>
+        Entities.WithStructuralChanges().ForEach((DynamicBuffer<PathPositions> pathPositionBuffer, ref TargetPosition targetPosition, in PathIndex pathFollow, in FormationLeader leader, in LocalToWorld localToWorld) =>
         {
             var formation = em.GetComponentData<Formation>(leader.formationEntity);
 
@@ -16,7 +16,7 @@ public class FormationLeaderSystem : SystemBase{
             
             em.SetComponentData(leader.formationEntity, formation);
 
-            if (pathFollow.Value >= 0)
+            if (pathFollow.Value != -1)
             {
                 targetPosition.Value = pathPositionBuffer[pathFollow.Value].Value;
             }

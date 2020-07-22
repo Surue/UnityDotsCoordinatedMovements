@@ -14,7 +14,6 @@ public class MovementSystem : SystemBase
         
         Entities.ForEach((ref Translation translation, ref Rotation rotation, in Velocity velocity) =>
         {
-            float2 normalizedVel = math.normalizesafe(velocity.Value);
             translation.Value += new float3(velocity.Value.x, 0, velocity.Value.y) * dt;
 
             if (math.lengthsq(velocity.Value) > 0.1f)

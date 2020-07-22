@@ -22,13 +22,13 @@ public class ORCASystem : SystemBase {
     protected override void OnUpdate()
     {
         NativeMultiHashMap<int, NeighborData> quadrantMap = QuadrantSystem.quadrantMultiHashMap;
-        float radius_ = 0.5f;
-        float timeHorizon_ = 5.0f;
-        float neighborsDist_ = 15.0f;
-        int maxNeighbors_ = 10;
-        float maxSpeed_ = 5.0f;
+        float radius = 0.6f;
+        float timeHorizon = 5.0f;
+        float neighborsDist = 15.0f;
+        int maxNeighbors = 10;
+        float maxSpeed = 5.0f;
         float dt = UnityEngine.Time.deltaTime;
-        float invTimeHorizon = 1.0f / timeHorizon_;
+        float invTimeHorizon = 1.0f / timeHorizon;
         
 
         //TODO change it to be ScheduleParallel
@@ -50,7 +50,7 @@ public class ORCASystem : SystemBase {
                 NativeList<Line> orcaLines = new NativeList<Line>(Allocator.Temp);
                 NativeList<KeyValuePair<float, AgentNeighbor>> agentNeighbors =
                     new NativeList<KeyValuePair<float, AgentNeighbor>>(Allocator.Temp);
-                float rangeSqr = neighborsDist_ * neighborsDist_;
+                float rangeSqr = neighborsDist * neighborsDist;
 
                 int nbObstacleLine = 0;
                 float2 currentPos = translation.Value.xz;
@@ -71,7 +71,7 @@ public class ORCASystem : SystemBase {
                             if (distSqr < rangeSqr)
                             {
                                 //If there is a free space, add it immediatly
-                                if (agentNeighbors.Length < maxNeighbors_)
+                                if (agentNeighbors.Length < maxNeighbors)
                                 {
                                     agentNeighbors.Add(new KeyValuePair<float, AgentNeighbor>(distSqr, new AgentNeighbor()
                                     { 
@@ -98,7 +98,7 @@ public class ORCASystem : SystemBase {
                                 });
 
                                 //If the list is full, only check agent nearer than the farrest neighbor.
-                                if (agentNeighbors.Length == maxNeighbors_)
+                                if (agentNeighbors.Length == maxNeighbors)
                                 {
                                     rangeSqr = agentNeighbors[agentNeighbors.Length - 1].Key;
                                 }
@@ -117,7 +117,7 @@ public class ORCASystem : SystemBase {
                     float2 relativePosition = otherAgent.position - translation.Value.xz;
                     float2 relativeVelocity = velocity.Value - otherAgent.velocity;
                     float distSqr = math.lengthsq(relativePosition);
-                    float combinedRadius = radius_ + otherAgent.radius;
+                    float combinedRadius = radius + otherAgent.radius;
                     float combinedRadiusSqr = math.pow(combinedRadius, 2);
 
                     Line line;
@@ -184,11 +184,11 @@ public class ORCASystem : SystemBase {
                 }
 
                 float2 optimalVel = velocity.Value;
-                int lineFail = LinearProgram2(orcaLines, maxSpeed_, optimalVel, false, ref velocity.Value);
+                int lineFail = LinearProgram2(orcaLines, maxSpeed, optimalVel, false, ref velocity.Value);
 
                 if (lineFail < orcaLines.Length)
                 {
-                    LinearProgram3(orcaLines, nbObstacleLine, lineFail, maxSpeed_, ref velocity.Value);
+                    LinearProgram3(orcaLines, nbObstacleLine, lineFail, maxSpeed, ref velocity.Value);
                 }
 
                 orcaLines.Dispose();

@@ -7,6 +7,7 @@ using Unity.Entities.CodeGeneratedJobForEach;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
+using UnityEditor.MemoryProfiler;
 
 public struct PairEntityFormation {
     public Entity entity;
@@ -56,72 +57,71 @@ public class FormationFollowerSystem : SystemBase {
             int entityInQueryIndex,
             DynamicBuffer<PathPositions> pathPositionBuffer, 
             ref TargetPosition targetPosition, 
-            ref PathFollow pathFollow, 
+            in PathIndex pathFollow, 
             in Translation translation, 
             in FormationFollower follower) =>
         {
             //Get Formation
-            Formation formation = new Formation();
+            Formation currentFormation = new Formation();
             for (int i = 0; i < formations.Length; i++)
             {
                 if (formations[i].entity == follower.formationEntity)
                 {
-                    formation = formations[i].formation;
+                    currentFormation = formations[i].formation;
                     break;
                 }
             }
             
             //Get target position
-            float2 tmpPosition = formation.GetTargetPosition(follower.positionID);
+            float2 tmpPosition = currentFormation.GetTargetPosition(follower.positionID);
 
             //Compute distance 
             float distanceToTarget = math.distance(translation.Value.xz, tmpPosition);
 
             // Too far must use pathfinding
-            if (distanceToTarget > formation.separatedDistance)
+            if (distanceToTarget > currentFormation.separatedDistance)
             {
-                //If the path is already computed
-                if (pathFollow.Value != -1)
-                {
-                    targetPosition.Value = pathPositionBuffer[pathFollow.Value].Value;
-                    
-                    //If distance between and path and real position is too big ask a new path
-                    if (math.distance(pathPositionBuffer[0].Value, tmpPosition) > formation.separatedDistance)
-                    {
-                        ecb.AddComponent(entityInQueryIndex, entity, new PathFindingRequest()
-                        {
-                            startPos = translation.Value.xz,
-                            endPos = tmpPosition
-                        });
-                    }
-                }
-                else
+                //if there is not path, compute a new one
+                if (pathFollow.Value == -1)
                 {
                     ecb.AddComponent(entityInQueryIndex, entity, new PathFindingRequest()
                     {
                         startPos = translation.Value.xz,
                         endPos = tmpPosition
                     });
+                    
+                    targetPosition.Value = translation.Value.xz;
+                //If distance from last pos in path is too far from the tmpPositon, compute a new path    
+                }else if (math.distance(pathPositionBuffer[0].Value, tmpPosition) > currentFormation.separatedDistance * 2) {
+                    ecb.AddComponent(entityInQueryIndex, entity, new PathFindingRequest()
+                    {
+                        startPos = translation.Value.xz,
+                        endPos = tmpPosition
+                    });
+                    
+                    targetPosition.Value = translation.Value.xz;
+                }
+                else
+                {
+                    targetPosition.Value = pathPositionBuffer[pathFollow.Value].Value;
                 }
             }
             else //Close enough to just go to position
             {
                 targetPosition.Value = tmpPosition;
-                pathFollow.Value = -1;
             }
         }).ScheduleParallel();
         
         //TODO Must be parallelized
         //Define if formation are forming or formed
         Entities.ForEach((
-            in PathFollow pathFollow, 
+            in PathIndex pathFollow, 
             in FormationFollower follower) =>
         {
 
             //Get target position
             if (pathFollow.Value != -1)
             {
-                    
                 //Get Formation
                 Formation formation = new Formation();
                 int i;

@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Linq;
+using System.Runtime.CompilerServices;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -32,7 +33,7 @@ public class PathFinderSystem : SystemBase
         }
         
         //TODO Try to optimize
-        Entities.WithStructuralChanges().WithoutBurst().ForEach((Entity entity, int entityInQueryIndex, DynamicBuffer<PathPositions> pathPositionBuffer, ref PathFindingRequest request, ref PathFollow pathFollow) =>
+        Entities.WithStructuralChanges().WithoutBurst().ForEach((Entity entity, int entityInQueryIndex, DynamicBuffer<PathPositions> pathPositionBuffer, ref PathFindingRequest request, ref PathIndex pathFollow) =>
         {
             //use A* to find path
             FindPathJob findPathJob = new FindPathJob()
@@ -44,13 +45,12 @@ public class PathFinderSystem : SystemBase
                 waypoints = _waypointGraph.Waypoints
             };
 
-            //Setup pathFollow
-            pathFollow.Value = pathPositionBuffer.Length - 1;
             
             // jobHandlesList.Add(findPathJob.Schedule());
             
             //TODO optimize
             findPathJob.Run();
+            pathFollow.Value = pathPositionBuffer.Length - 1;
             
             //Remove path finding request from the entity
             // ecb.RemoveComponent<PathFindingRequest>(entityInQueryIndex, entity);
@@ -110,8 +110,8 @@ public class PathFinderSystem : SystemBase
 
             int maxIteration = 20;
             
-            Debug.Log("startIndex = " + startIndex);
-            Debug.Log("endIndex = " + endIndex);
+            // Debug.Log("startIndex = " + startIndex);
+            // Debug.Log("endIndex = " + endIndex);
             
             while (maxIteration-- > 0 && openList.Length > 0)
             {
@@ -129,7 +129,7 @@ public class PathFinderSystem : SystemBase
                 }
     
                 currentIndex = openList[indexToRemove];
-                Debug.Log("    current index = " + currentIndex);
+                // Debug.Log("    current index = " + currentIndex);
                 openList.RemoveAt(indexToRemove);
                 
                 //Add to closed list
@@ -138,7 +138,7 @@ public class PathFinderSystem : SystemBase
                 //If the current node is the end node then the algorithm is finished 
                 if (currentIndex == endIndex)
                 {
-                    Debug.Log("OUT");
+                    // Debug.Log("OUT");
                     break;
                 }
                 
@@ -146,36 +146,36 @@ public class PathFinderSystem : SystemBase
                 for (int i = 0; i < waypoints[currentIndex].neigborCount; i++)
                 {
                     int neighborLinkIndex = i + waypoints[currentIndex].firstNeighbors;
-                    Debug.Log("        index = " + neighborLinkIndex);
+                    // Debug.Log("        index = " + neighborLinkIndex);
                     int neighborIndex = Neighbors[neighborLinkIndex].neighborsIndex;
 
-                    Debug.Log("        neighbors index : " + neighborIndex + ", at position" + waypoints[neighborIndex].position);
+                    // Debug.Log("        neighbors index : " + neighborIndex + ", at position" + waypoints[neighborIndex].position);
                     
                     //Compute new cost
                     float newCost = 
                         totalCost[currentIndex] + //Total cost
                         Neighbors[neighborLinkIndex].moveCost + //Move cost
                         math.distance(waypoints[neighborIndex].position,waypoints[endIndex].position);  //Heuristic cost
-                    Debug.Log("            totalCost[currentIndex] = " + totalCost[currentIndex]);
-                    Debug.Log("            Neighbors[neighborLinkIndex].moveCost = " + Neighbors[neighborLinkIndex].moveCost);
-                    Debug.Log("            math.distance(waypoints[i].position,waypoints[neighborIndex].position)" + math.distance(waypoints[neighborIndex].position,waypoints[endIndex].position));
-                    Debug.Log("            new cost = " + newCost);
+                    // Debug.Log("            totalCost[currentIndex] = " + totalCost[currentIndex]);
+                    // Debug.Log("            Neighbors[neighborLinkIndex].moveCost = " + Neighbors[neighborLinkIndex].moveCost);
+                    // Debug.Log("            math.distance(waypoints[i].position,waypoints[neighborIndex].position)" + math.distance(waypoints[neighborIndex].position,waypoints[endIndex].position));
+                    // Debug.Log("            new cost = " + newCost);
                     if (newCost < totalCost[neighborIndex])
                     {
-                        Debug.Log("                Set new cost");
+                        // Debug.Log("                Set new cost");
                         totalCost[neighborIndex] = newCost;
                         cameFrom[neighborIndex] = currentIndex;
 
                         if (!openList.Contains(neighborIndex))
                         {
-                            Debug.Log("                Add " + neighborIndex + " to openList");
+                            // Debug.Log("                Add " + neighborIndex + " to openList");
                             openList.Add(neighborIndex);
                         }
                     }
                 }
             }
 
-            Debug.Log("iteration = " + maxIteration);
+            // Debug.Log("iteration = " + maxIteration);
             
             //Calculate path
             CalculatePath(cameFrom, endIndex, startIndex);
@@ -187,6 +187,7 @@ public class PathFinderSystem : SystemBase
             closedList.Dispose();
         }
         
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void CalculatePath(NativeArray<int> cameFrom, int endIndex, int startIndex) {
             //Clear path
             path.Clear();
@@ -200,11 +201,15 @@ public class PathFinderSystem : SystemBase
                 {
                     Value = waypoints[currentIndex].position
                 });
-                Debug.Log(currentIndex + " ? " + startIndex);
                 currentIndex = cameFrom[currentIndex];
             }
             
-            Debug.Log(maxIteration);
+            path.Add(new PathPositions()
+            {
+                Value = waypoints[startIndex].position
+            });
+
+            // Debug.Log(maxIteration);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
