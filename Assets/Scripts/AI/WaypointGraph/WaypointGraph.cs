@@ -1,14 +1,28 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.Collections;
-using Unity.Entities;
+﻿using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
 public class WaypointGraph : MonoBehaviour {
+
+    public static WaypointGraph Instance;
+    
     private NativeArray<Waypoint> waypoints;
     private NativeArray<WaypointNeighbors> neighbors;
+
+    public NativeArray<Waypoint> Waypoints => waypoints;
+    public NativeArray<WaypointNeighbors> Neighbors => neighbors;
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(this);
+        }
+    }
 
     void Start()
     {
@@ -51,7 +65,7 @@ public class WaypointGraph : MonoBehaviour {
                     neighborsIndex = neighborIndex
                 };
 
-                Debug.Log("["+j+"] = " + (waypoints[i].firstNeighbors + j));
+                // Debug.Log("["+j+"] = " + (waypoints[i].firstNeighbors + j));
             }
         }
         
