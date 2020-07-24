@@ -17,6 +17,7 @@ public struct Waypoint {
 }
 
 public class WaypointEditor : MonoBehaviour {
+    private List<WaypointEditor> previousNeighbors;
     public List<WaypointEditor> neighbors;
 
     private int index;
@@ -31,21 +32,45 @@ public class WaypointEditor : MonoBehaviour {
     {
         if (neighbors != null)
         {
-            foreach (var neighbors in neighbors)
+            //remove an neighbors 
+            if (previousNeighbors != null)
             {
-                bool exist = false;
-                foreach (var indirectNeighbors in neighbors.neighbors)
+                foreach (var waypoint in previousNeighbors)
                 {
-                    if (indirectNeighbors == this)
+                    if (!neighbors.Contains(waypoint))
                     {
-                        exist = true;
-                        break;
+                        waypoint.neighbors.Remove(this);
                     }
                 }
-
-                if (!exist)
+            }
+            else
+            {
+                previousNeighbors = new List<WaypointEditor>();
+            }
+            
+            //Add new neighbors
+            foreach (var neighbors in neighbors)
+            {
+                if(neighbors == null) continue;
+                if (!neighbors.neighbors.Contains(this))
                 {
                     neighbors.neighbors.Add(this);
+                }
+            }
+            
+            previousNeighbors.Clear();
+
+            foreach (var waypointEditor in neighbors)
+            {
+                if (waypointEditor == null) continue;
+                previousNeighbors.Add(waypointEditor);
+            }
+
+            for (int i = neighbors.Count - 1; i >= 0; i--)
+            {
+                if (neighbors[i] == null || neighbors[i] == this)
+                {
+                    neighbors.RemoveAt(i);
                 }
             }
         }
@@ -60,6 +85,7 @@ public class WaypointEditor : MonoBehaviour {
         {
             foreach (var waypointEditor in neighbors)
             {
+                if(waypointEditor == null) continue;
                 Vector3 dir = waypointEditor.transform.position - transform.position;
                 dir.Normalize();
                 Vector3 perp = new Vector3(dir.z, 0, -dir.x);
