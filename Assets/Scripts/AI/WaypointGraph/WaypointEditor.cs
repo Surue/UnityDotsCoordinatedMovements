@@ -16,6 +16,7 @@ public struct Waypoint {
     public int neigborCount;
 }
 
+[ExecuteInEditMode]
 public class WaypointEditor : MonoBehaviour {
     private List<WaypointEditor> previousNeighbors;
     public List<WaypointEditor> neighbors;
@@ -73,6 +74,27 @@ public class WaypointEditor : MonoBehaviour {
                     neighbors.RemoveAt(i);
                 }
             }
+        }
+    }
+
+    public void RemoveNeighbors(WaypointEditor waypointEditor)
+    {
+        if (neighbors.Contains(waypointEditor))
+        {
+            neighbors.Remove(waypointEditor);
+        }
+
+        if (previousNeighbors.Contains(waypointEditor))
+        {
+            previousNeighbors.Remove(waypointEditor);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        foreach (var waypointEditor in neighbors)
+        {
+            waypointEditor.RemoveNeighbors(this);
         }
     }
 
