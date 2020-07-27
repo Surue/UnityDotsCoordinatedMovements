@@ -87,7 +87,7 @@ public class FormationFollowerSystem : SystemBase {
                     });
                     
                     targetPosition.Value = translation.Value.xz;
-                //If distance from last pos in path is too far from the tmpPositon, compute a new path    
+                //If distance from last pos in path is too far from the tmpPosition, compute a new path    
                 }else if (math.distance(pathPositionBuffer[0].Value, tmpPosition) > currentFormation.separatedDistance * 2) {
                     ecb.AddComponent(entityInQueryIndex, entity, new PathFindingRequest()
                     {

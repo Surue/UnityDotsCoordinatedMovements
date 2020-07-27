@@ -1,4 +1,5 @@
-﻿using Unity.Collections;
+﻿using System.Runtime.CompilerServices;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -37,14 +38,14 @@ public class QuadrantSystem : SystemBase
 
     protected override void OnUpdate()
     {
-        EntityQuery queryFollower = GetEntityQuery(typeof(FormationFollower));
-        EntityQuery queryLeader = GetEntityQuery(typeof(FormationLeader));
+        // EntityQuery queryFollower = GetEntityQuery(typeof(FormationFollower));
+        // EntityQuery queryLeader = GetEntityQuery(typeof(FormationLeader));
         
         quadrantMultiHashMap.Clear();
-        int count = queryFollower.CalculateEntityCount() + queryLeader.CalculateEntityCount();
-        if (count > quadrantMultiHashMap.Capacity) {
-            quadrantMultiHashMap.Capacity = count;
-        }
+        // int count = queryFollower.CalculateEntityCount() + queryLeader.CalculateEntityCount();
+        // if (count > quadrantMultiHashMap.Capacity) {
+        //     quadrantMultiHashMap.Capacity = count;
+        // }
         
         //TODO Change to use burst compiler
         Entities.WithoutBurst().WithAny<FormationFollower, FormationLeader>().ForEach((in Translation translation, in Velocity velocity) =>
@@ -54,6 +55,7 @@ public class QuadrantSystem : SystemBase
         }).Run();
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int GetPositionHashMapKey(float3 pos) {
         return (int)math.floor(pos.x / quadrantCellSize) + (int)(quadrantYMultiplier * math.floor(pos.z / quadrantCellSize));
     }
@@ -70,9 +72,8 @@ public class QuadrantSystem : SystemBase
     public static NativeList<int> GetCurrentCellAndNeighborsKeys(float3 pos)
     {
         int currentKey = GetPositionHashMapKey(pos);
-        
-        NativeList<int> neighborsKeys = new NativeList<int>(Allocator.Temp);
-        neighborsKeys.Add(currentKey);
+
+        NativeList<int> neighborsKeys = new NativeList<int>(Allocator.Temp) {currentKey};
 
         float3 lowerLeft = new float3((math.floor(pos.x / quadrantCellSize)) * quadrantCellSize, 0, math.floor(pos.z / quadrantCellSize) * quadrantCellSize);
         float3 topRight = lowerLeft + new float3(1, 0, 1) * quadrantCellSize;

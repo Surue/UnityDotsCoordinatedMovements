@@ -53,6 +53,7 @@ public class PathFinderSystem : SystemBase
             //TODO optimize
             findPathJob.Run();
             pathFollow.Value = pathPositionBuffer.Length - 1;
+            Debug.Log(pathFollow.Value);
             
             //Remove path finding request from the entity
             // ecb.RemoveComponent<PathFindingRequest>(entityInQueryIndex, entity);
@@ -102,8 +103,13 @@ public class PathFinderSystem : SystemBase
                 path.Clear();
                 path.Add(new PathPositions()
                 {
+                    Value = endPos
+                });
+                path.Add(new PathPositions()
+                {
                     Value = waypoints[startIndex].position
                 });
+                Debug.Log("Same point");
                 return;
             }
 
