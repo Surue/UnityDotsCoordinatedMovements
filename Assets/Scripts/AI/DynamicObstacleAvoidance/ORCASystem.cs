@@ -31,7 +31,6 @@ public class ORCASystem : SystemBase {
         float dt = UnityEngine.Time.deltaTime;
         float invTimeHorizon = 1.0f / timeHorizon;
         
-
         //TODO change it to be ScheduleParallel
         Entities.WithReadOnly(quadrantMap).ForEach(
             (ref Velocity velocity, in ORCATag tag, in Translation translation) =>
@@ -42,7 +41,7 @@ public class ORCASystem : SystemBase {
                 }
                 
                 //DRAW
-                QuadrantSystem.DebugDrawQuadrant(translation.Value);
+                // QuadrantSystem.DebugDrawQuadrant(translation.Value);
                 
                 NativeList<int> quadrantKeys = new NativeList<int>(Allocator.Temp);
 
@@ -114,8 +113,8 @@ public class ORCASystem : SystemBase {
                     AgentNeighbor otherAgent = agentNeighbors[i].Value;
 
                     //DRAW
-                    Debug.DrawLine(translation.Value,
-                        new Vector3(otherAgent.position.x, translation.Value.y, otherAgent.position.y));
+                    // Debug.DrawLine(translation.Value,
+                    //     new Vector3(otherAgent.position.x, translation.Value.y, otherAgent.position.y));
                     
                     float2 relativePosition = otherAgent.position - translation.Value.xz;
                     float2 relativeVelocity = velocity.Value - otherAgent.velocity;
@@ -198,7 +197,7 @@ public class ORCASystem : SystemBase {
                 agentNeighbors.Dispose();
 
                 quadrantKeys.Dispose();
-            }).Run();
+            }).ScheduleParallel();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

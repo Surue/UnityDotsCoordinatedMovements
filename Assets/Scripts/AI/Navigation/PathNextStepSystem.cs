@@ -9,7 +9,7 @@ public class PathNextStepSystem : SystemBase
     protected override void OnUpdate()
     {
         //Dynamic buffer must be at the start
-        Entities.ForEach((DynamicBuffer<PathPositions> pathPositionBuffer, ref PathIndex pathFollow, in Translation position, in TargetPosition targetPosition) =>
+        Entities.ForEach((ref PathIndex pathFollow, in Translation position, in TargetPosition targetPosition) =>
         {
             //TODO Not good for //
             if (pathFollow.Value == -1) return;
