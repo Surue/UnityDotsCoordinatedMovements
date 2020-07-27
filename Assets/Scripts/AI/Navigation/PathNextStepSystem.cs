@@ -2,6 +2,8 @@
 using Unity.Mathematics;
 using Unity.Transforms;
 
+[UpdateInGroup(typeof(AiGroup))]
+[UpdateAfter(typeof(PathFinderSystem))]
 public class PathNextStepSystem : SystemBase
 {
     protected override void OnUpdate()

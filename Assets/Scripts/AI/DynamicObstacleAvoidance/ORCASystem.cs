@@ -17,6 +17,7 @@ public struct AgentNeighbor {
     public float2 position;
 }
 
+[UpdateInGroup(typeof(AiGroup))]
 [UpdateAfter(typeof(VelocitySystem))]
 public class ORCASystem : SystemBase {
     protected override void OnUpdate()
@@ -40,13 +41,12 @@ public class ORCASystem : SystemBase {
                     return;
                 }
                 
+                //DRAW
                 QuadrantSystem.DebugDrawQuadrant(translation.Value);
                 
                 NativeList<int> quadrantKeys = new NativeList<int>(Allocator.Temp);
 
                 quadrantKeys = QuadrantSystem.GetCurrentCellAndNeighborsKeys(translation.Value);
-
-                // QuadrantSystem.DebugDrawQuadrant(translation.Value);
 
                 //ORCA setup
                 NativeList<Line> orcaLines = new NativeList<Line>(Allocator.Temp);
@@ -66,7 +66,7 @@ public class ORCASystem : SystemBase {
                         //TODO use better condition
                         if (math.distancesq(neighbor.position, currentPos) > 0.001f)
                         {
-                            float2 dir = currentPos - neighbor.position.y;
+                            float2 dir = currentPos - neighbor.position;
                             float distSqr = math.dot(dir, dir);
 
                             //If the other agent is under the minimum range => add it
@@ -108,14 +108,14 @@ public class ORCASystem : SystemBase {
                         }
                     } while (quadrantMap.TryGetNextValue(out neighbor, ref nativeMultiHashMapIterator));
                 }
-
+                
                 for(int i = 0; i < agentNeighbors.Length; i++)
                 {
                     AgentNeighbor otherAgent = agentNeighbors[i].Value;
 
                     //DRAW
-                    // Debug.DrawLine(translation.Value,
-                    //     new Vector3(otherAgent.position.x, translation.Value.y, otherAgent.position.y));
+                    Debug.DrawLine(translation.Value,
+                        new Vector3(otherAgent.position.x, translation.Value.y, otherAgent.position.y));
                     
                     float2 relativePosition = otherAgent.position - translation.Value.xz;
                     float2 relativeVelocity = velocity.Value - otherAgent.velocity;

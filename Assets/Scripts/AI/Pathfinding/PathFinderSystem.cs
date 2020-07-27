@@ -7,6 +7,8 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
+[UpdateInGroup(typeof(AiGroup))]
+[UpdateAfter(typeof(FormationFollowerSystem))]
 public class PathFinderSystem : SystemBase
 {
     private EntityCommandBufferSystem ecbSystem;

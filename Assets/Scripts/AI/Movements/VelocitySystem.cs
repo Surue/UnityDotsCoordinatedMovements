@@ -1,8 +1,8 @@
 ﻿using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine;
 
+[UpdateInGroup(typeof(AiGroup))]
 [UpdateAfter(typeof(QuadrantSystem))]
 public class VelocitySystem : SystemBase
 {

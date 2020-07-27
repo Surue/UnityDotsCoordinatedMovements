@@ -5,6 +5,7 @@ using Unity.Transforms;
 /// <summary>
 /// Update the position and rotation according to the velocity
 /// </summary>
+[UpdateInGroup(typeof(AiGroup), OrderLast = true)]
 [UpdateAfter(typeof(ORCASystem))]
 public class MovementSystem : SystemBase
 {

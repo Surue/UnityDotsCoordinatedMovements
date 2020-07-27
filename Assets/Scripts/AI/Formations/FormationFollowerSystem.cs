@@ -9,6 +9,7 @@ public struct PairEntityFormation {
     public Formation formation;
 }
 
+[UpdateInGroup(typeof(AiGroup))]
 [UpdateAfter(typeof(FormationLeaderSystem))]
 public class FormationFollowerSystem : SystemBase {
 

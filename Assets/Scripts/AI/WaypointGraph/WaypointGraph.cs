@@ -84,7 +84,7 @@ public class WaypointGraph : MonoBehaviour {
         neighbors.Dispose();
     }
 
-    private void OnDrawGizmos()
+    private void OnDrawGizmosSelected()
     {
         if (waypoints.IsCreated)
         {

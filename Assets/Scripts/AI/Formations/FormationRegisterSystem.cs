@@ -1,5 +1,6 @@
 using Unity.Entities;
 
+[UpdateInGroup(typeof(AiGroup), OrderFirst = true)]
 public class FormationRegisterSystem : SystemBase{
     protected override void OnUpdate()
     {

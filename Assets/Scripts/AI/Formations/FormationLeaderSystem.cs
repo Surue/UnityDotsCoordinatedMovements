@@ -1,8 +1,8 @@
-
 using Unity.Entities;
 using Unity.Transforms;
 
-[UpdateAfter(typeof(FormationRegisterSystem))]
+[UpdateInGroup(typeof(AiGroup))]
+[UpdateAfter(typeof(FormationSetupSystem))]
 public class FormationLeaderSystem : SystemBase{
     protected override void OnUpdate()
     {

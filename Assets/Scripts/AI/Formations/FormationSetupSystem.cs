@@ -1,8 +1,5 @@
 ﻿using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
-using Unity.Rendering;
-using UnityEngine;
 
 public struct FormationSetupData {
     public Entity entity;
@@ -11,6 +8,7 @@ public struct FormationSetupData {
     public int count;
 }
 
+[UpdateInGroup(typeof(AiGroup))]
 [UpdateAfter(typeof(FormationRegisterSystem))]
 public class FormationSetupSystem : SystemBase
 {
@@ -29,6 +27,8 @@ public class FormationSetupSystem : SystemBase
         
         NativeList<FormationSetupData> formationEntityToSetup = new NativeList<FormationSetupData>(Allocator.TempJob);
 
+        bool needSetup = false;
+        
         Entities.WithStructuralChanges().WithoutBurst().ForEach((
             Entity entity, 
             int entityInQueryIndex,
@@ -42,10 +42,11 @@ public class FormationSetupSystem : SystemBase
 
             EntityManager.RemoveComponent<FormationSetup>(entity);
             // ecb.RemoveComponent<FormationSetup>(entityInQueryIndex, entity);
+            needSetup = true;
         }).Run();
         
 
-        if (formationEntityToSetup.Length == 0)
+        if (!needSetup)
         {
             formationEntityToSetup.Dispose();
             return;
