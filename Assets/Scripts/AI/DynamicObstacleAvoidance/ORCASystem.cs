@@ -40,6 +40,8 @@ public class ORCASystem : SystemBase {
                     return;
                 }
                 
+                QuadrantSystem.DebugDrawQuadrant(translation.Value);
+                
                 NativeList<int> quadrantKeys = new NativeList<int>(Allocator.Temp);
 
                 quadrantKeys = QuadrantSystem.GetCurrentCellAndNeighborsKeys(translation.Value);
@@ -70,7 +72,7 @@ public class ORCASystem : SystemBase {
                             //If the other agent is under the minimum range => add it
                             if (distSqr < rangeSqr)
                             {
-                                //If there is a free space, add it immediatly
+                                //If there is a free space, add it immediately
                                 if (agentNeighbors.Length < maxNeighbors)
                                 {
                                     agentNeighbors.Add(new KeyValuePair<float, AgentNeighbor>(distSqr, new AgentNeighbor()
@@ -111,6 +113,7 @@ public class ORCASystem : SystemBase {
                 {
                     AgentNeighbor otherAgent = agentNeighbors[i].Value;
 
+                    //DRAW
                     // Debug.DrawLine(translation.Value,
                     //     new Vector3(otherAgent.position.x, translation.Value.y, otherAgent.position.y));
                     
@@ -195,7 +198,7 @@ public class ORCASystem : SystemBase {
                 agentNeighbors.Dispose();
 
                 quadrantKeys.Dispose();
-            }).ScheduleParallel();
+            }).Run();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

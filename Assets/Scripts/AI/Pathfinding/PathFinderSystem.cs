@@ -93,7 +93,7 @@ public class PathFinderSystem : SystemBase
             //Get start and end index
             int startIndex = GetClosestNodeIndex(startPos);
             int endIndex = GetClosestNodeIndex(endPos);
-            
+
             //Security if startIndex == endIndex
             if (startIndex == endIndex)
             {
@@ -178,7 +178,7 @@ public class PathFinderSystem : SystemBase
             // Debug.Log("iteration = " + maxIteration);
             
             //Calculate path
-            CalculatePath(cameFrom, endIndex, startIndex);
+            CreatePath(cameFrom, endIndex, startIndex);
             
             //Dispose every temporary allocated container
             cameFrom.Dispose();
@@ -188,13 +188,19 @@ public class PathFinderSystem : SystemBase
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void CalculatePath(NativeArray<int> cameFrom, int endIndex, int startIndex) {
+        void CreatePath(NativeArray<int> cameFrom, int endIndex, int startIndex) {
             //Clear path
             path.Clear();
             
             //Build path
             int currentIndex = endIndex;
             int maxIteration = 20;
+            
+            path.Add(new PathPositions()
+            {
+                Value = endPos
+            });
+            
             while (--maxIteration > 0 && currentIndex != startIndex)
             {
                 path.Add(new PathPositions()

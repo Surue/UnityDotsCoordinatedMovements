@@ -1,5 +1,7 @@
-﻿using Unity.Collections;
+﻿using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Mathematics;
+using UnityEditor;
 using UnityEngine;
 
 public class WaypointGraph : MonoBehaviour {
@@ -110,3 +112,71 @@ public class WaypointGraph : MonoBehaviour {
         }
     }
 }
+
+#if UNITY_EDITOR
+[CustomEditor(typeof(WaypointGraph))]
+public class WaypointGraphEditor : Editor{
+    public override void OnInspectorGUI()
+    {
+        DrawDefaultInspector();
+
+        WaypointGraph instance = (WaypointGraph) target;
+
+        if (GUILayout.Button("Build waypoint graph distance"))
+        {
+            var tmpWaypoints = instance.GetComponentsInChildren<WaypointEditor>();
+
+            foreach (var waypointEditor in tmpWaypoints)
+            {
+                waypointEditor.maxDistance = new List<float>();
+
+                for (var index = 0; index < waypointEditor.neighbors.Count; index++)
+                {
+                    var neighbor = waypointEditor.neighbors[index];
+                    Vector3 startPos = waypointEditor.transform.position;
+                    Vector3 endPos = neighbor.transform.position;
+                    Vector3 dir = (endPos - startPos).normalized;
+
+                    Vector3 perp = new Vector3(dir.z, 0, -dir.x);
+
+                    Vector3 offset = Vector3.zero;
+
+                    for (int i = 0; i < 10; i++)
+                    {
+                        Physics.Raycast(startPos + dir * i, perp, out RaycastHit hit);
+                    }
+
+                    float maxDistance = float.MaxValue;
+
+                    while (Vector3.Distance(startPos + offset, startPos) < Vector3.Distance(startPos, endPos))
+                    {
+                        offset += dir;
+
+                        if (Physics.Raycast(startPos + offset, perp, out RaycastHit hit))
+                        {
+                            float distance = Vector3.Distance(startPos + offset, hit.point);
+
+                            if (distance < maxDistance)
+                            {
+                                maxDistance = distance;
+                            }
+                        }
+
+                        if (Physics.Raycast(startPos + offset, -perp, out RaycastHit hit2))
+                        {
+                            float distance = Vector3.Distance(startPos + offset, hit2.point);
+
+                            if (distance < maxDistance)
+                            {
+                                maxDistance = distance;
+                            }
+                        }
+                    }
+
+                    waypointEditor.maxDistance.Add(maxDistance);
+                }
+            }
+        }
+    }
+}
+#endif

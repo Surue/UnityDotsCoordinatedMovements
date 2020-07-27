@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
+using UnityEditor;
 using UnityEngine;
 
 public struct WaypointNeighbors {
     public float moveCost;
     public int neighborsIndex;
+    public float maxDistance;
 }
 
 public struct Waypoint {
@@ -20,7 +22,8 @@ public struct Waypoint {
 public class WaypointEditor : MonoBehaviour {
     private List<WaypointEditor> previousNeighbors;
     public List<WaypointEditor> neighbors;
-
+    public List<float> maxDistance;
+    
     private int index;
 
     public int Index
@@ -101,17 +104,47 @@ public class WaypointEditor : MonoBehaviour {
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, 0.5f);
+        Handles.color = Color.red;
+        Handles.DrawSolidDisc(transform.position, Vector3.up, 0.5f);
 
         if (neighbors != null)
         {
-            foreach (var waypointEditor in neighbors)
+            for (var index = 0; index < neighbors.Count; index++)
             {
-                if(waypointEditor == null) continue;
+                var waypointEditor = neighbors[index];
+                if (waypointEditor == null) continue;
                 Vector3 dir = waypointEditor.transform.position - transform.position;
                 dir.Normalize();
                 Vector3 perp = new Vector3(dir.z, 0, -dir.x);
-                Gizmos.DrawLine(transform.position + perp * 0.1f, waypointEditor.transform.position + perp * 0.1f);
+                Handles.DrawDottedLine(transform.position + perp * 0.1f, waypointEditor.transform.position + perp * 0.1f, 10);
+            }
+        }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.blue;
+
+        if (neighbors != null)
+        {
+            for (var index = 0; index < neighbors.Count; index++)
+            {
+                var waypointEditor = neighbors[index];
+                if (waypointEditor == null) continue;
+                Vector3 dir = waypointEditor.transform.position - transform.position;
+                dir.Normalize();
+                Vector3 perp = new Vector3(dir.z, 0, -dir.x);
+
+                if (maxDistance == null) continue;
+                Vector3 bottomLeft = transform.position - perp * maxDistance[index];
+                Vector3 bottomRight = waypointEditor.transform.position - perp * maxDistance[index];
+                Vector3 topRight = waypointEditor.transform.position + perp * maxDistance[index];
+                Vector3 topLeft = transform.position + perp * maxDistance[index];
+
+                Gizmos.DrawLine(bottomLeft, bottomRight);
+                Gizmos.DrawLine(bottomRight, topRight);
+                Gizmos.DrawLine(topRight, topLeft);
+                Gizmos.DrawLine(topLeft, bottomLeft);
             }
         }
     }

@@ -1,13 +1,8 @@
-﻿using System;
-using System.Linq;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
+﻿using Unity.Collections;
 using Unity.Entities;
-using Unity.Entities.CodeGeneratedJobForEach;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEditor.MemoryProfiler;
 
 public struct PairEntityFormation {
     public Entity entity;

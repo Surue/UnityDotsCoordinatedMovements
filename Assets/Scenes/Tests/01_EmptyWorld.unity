@@ -515,6 +515,15 @@ MonoBehaviour:
   - {fileID: 1405855397}
   - {fileID: 910065124}
   - {fileID: 645948922}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &129492148
 Transform:
   m_ObjectHideFlags: 0
@@ -565,9 +574,17 @@ MonoBehaviour:
   - {fileID: 1405855397}
   - {fileID: 910065124}
   - {fileID: 231033855}
-  - {fileID: 180762029}
   - {fileID: 406450607}
   - {fileID: 1134915839}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &180762030
 Transform:
   m_ObjectHideFlags: 0
@@ -614,6 +631,9 @@ MonoBehaviour:
   neighbors:
   - {fileID: 180762029}
   - {fileID: 910065124}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &231033856
 Transform:
   m_ObjectHideFlags: 0
@@ -660,6 +680,9 @@ MonoBehaviour:
   neighbors:
   - {fileID: 1245374894}
   - {fileID: 948976319}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &259201226
 Transform:
   m_ObjectHideFlags: 0
@@ -707,6 +730,10 @@ MonoBehaviour:
   - {fileID: 1405855397}
   - {fileID: 910065124}
   - {fileID: 645948922}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &297040687
 Transform:
   m_ObjectHideFlags: 0
@@ -838,6 +865,9 @@ MonoBehaviour:
   neighbors:
   - {fileID: 1405855397}
   - {fileID: 910065124}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &303895848
 Transform:
   m_ObjectHideFlags: 0
@@ -883,6 +913,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   neighbors:
   - {fileID: 1695524619}
+  maxDistance:
+  - 3.4028235e+38
 --- !u!4 &314159925
 Transform:
   m_ObjectHideFlags: 0
@@ -930,6 +962,10 @@ MonoBehaviour:
   - {fileID: 727354203}
   - {fileID: 1959964823}
   - {fileID: 1621605691}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &331932373
 Transform:
   m_ObjectHideFlags: 0
@@ -1062,6 +1098,10 @@ MonoBehaviour:
   - {fileID: 948976319}
   - {fileID: 1617048064}
   - {fileID: 180762029}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &406450608
 Transform:
   m_ObjectHideFlags: 0
@@ -1109,6 +1149,10 @@ MonoBehaviour:
   - {fileID: 1602148168}
   - {fileID: 473143005}
   - {fileID: 965851484}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &447718705
 Transform:
   m_ObjectHideFlags: 0
@@ -1246,6 +1290,15 @@ MonoBehaviour:
   - {fileID: 1616034726}
   - {fileID: 895516798}
   - {fileID: 727354203}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &473143006
 Transform:
   m_ObjectHideFlags: 0
@@ -1298,6 +1351,15 @@ MonoBehaviour:
   - {fileID: 1879678853}
   - {fileID: 1054262146}
   - {fileID: 1551177982}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &476372992
 Transform:
   m_ObjectHideFlags: 0
@@ -1450,6 +1512,10 @@ MonoBehaviour:
   - {fileID: 965851484}
   - {fileID: 1769341386}
   - {fileID: 1245374894}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &530344752
 Transform:
   m_ObjectHideFlags: 0
@@ -1585,9 +1651,17 @@ MonoBehaviour:
   - {fileID: 129492147}
   - {fileID: 476372991}
   - {fileID: 1054262146}
-  - {fileID: 645948922}
   - {fileID: 1551177982}
   - {fileID: 297040686}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &645948923
 Transform:
   m_ObjectHideFlags: 0
@@ -1777,11 +1851,19 @@ MonoBehaviour:
   - {fileID: 473143005}
   - {fileID: 2116266219}
   - {fileID: 1408182352}
-  - {fileID: 727354203}
   - {fileID: 1608928042}
   - {fileID: 1959964823}
   - {fileID: 331932372}
   - {fileID: 1418875015}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &727354204
 Transform:
   m_ObjectHideFlags: 0
@@ -2173,6 +2255,9 @@ MonoBehaviour:
   neighbors:
   - {fileID: 1602148168}
   - {fileID: 473143005}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &895516799
 Transform:
   m_ObjectHideFlags: 0
@@ -2306,11 +2391,19 @@ MonoBehaviour:
   - {fileID: 1405855397}
   - {fileID: 129492147}
   - {fileID: 297040686}
-  - {fileID: 910065124}
   - {fileID: 303895847}
   - {fileID: 1000204275}
   - {fileID: 1134915839}
   - {fileID: 231033855}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &910065125
 Transform:
   m_ObjectHideFlags: 0
@@ -2446,9 +2539,17 @@ MonoBehaviour:
   - {fileID: 259201225}
   - {fileID: 1617048064}
   - {fileID: 406450607}
-  - {fileID: 948976319}
   - {fileID: 1739119979}
   - {fileID: 1779920675}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &948976320
 Transform:
   m_ObjectHideFlags: 0
@@ -2495,6 +2596,9 @@ MonoBehaviour:
   neighbors:
   - {fileID: 1769341386}
   - {fileID: 1245374894}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &951935101
 Transform:
   m_ObjectHideFlags: 0
@@ -2547,6 +2651,15 @@ MonoBehaviour:
   - {fileID: 2116266219}
   - {fileID: 530344751}
   - {fileID: 447718704}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &965851485
 Transform:
   m_ObjectHideFlags: 0
@@ -2592,6 +2705,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   neighbors:
   - {fileID: 910065124}
+  maxDistance:
+  - 3.4028235e+38
 --- !u!4 &1000204276
 Transform:
   m_ObjectHideFlags: 0
@@ -2641,10 +2756,18 @@ MonoBehaviour:
   - {fileID: 1959964823}
   - {fileID: 1527269228}
   - {fileID: 1621605691}
-  - {fileID: 1048620051}
   - {fileID: 1695524619}
   - {fileID: 476372991}
   - {fileID: 645948922}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &1048620052
 Transform:
   m_ObjectHideFlags: 0
@@ -2692,6 +2815,10 @@ MonoBehaviour:
   - {fileID: 645948922}
   - {fileID: 476372991}
   - {fileID: 1695524619}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &1054262147
 Transform:
   m_ObjectHideFlags: 0
@@ -2822,6 +2949,10 @@ MonoBehaviour:
   - {fileID: 1617048064}
   - {fileID: 910065124}
   - {fileID: 180762029}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &1134915840
 Transform:
   m_ObjectHideFlags: 0
@@ -2874,6 +3005,15 @@ MonoBehaviour:
   - {fileID: 1516145949}
   - {fileID: 948976319}
   - {fileID: 1779920675}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &1245374895
 Transform:
   m_ObjectHideFlags: 0
@@ -3011,6 +3151,15 @@ MonoBehaviour:
   - {fileID: 297040686}
   - {fileID: 910065124}
   - {fileID: 303895847}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &1405855398
 Transform:
   m_ObjectHideFlags: 0
@@ -3063,6 +3212,15 @@ MonoBehaviour:
   - {fileID: 1621605691}
   - {fileID: 1768818238}
   - {fileID: 1481272076}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &1408182353
 Transform:
   m_ObjectHideFlags: 0
@@ -3109,6 +3267,9 @@ MonoBehaviour:
   neighbors:
   - {fileID: 1602148168}
   - {fileID: 727354203}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &1418875016
 Transform:
   m_ObjectHideFlags: 0
@@ -3413,10 +3574,18 @@ MonoBehaviour:
   - {fileID: 1048620051}
   - {fileID: 1408182352}
   - {fileID: 1512299641}
-  - {fileID: 1481272076}
   - {fileID: 476372991}
   - {fileID: 645948922}
   - {fileID: 1405855397}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &1481272077
 Transform:
   m_ObjectHideFlags: 0
@@ -3469,6 +3638,15 @@ MonoBehaviour:
   - {fileID: 1768818238}
   - {fileID: 1481272076}
   - {fileID: 180762029}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &1512299642
 Transform:
   m_ObjectHideFlags: 0
@@ -3514,6 +3692,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   neighbors:
   - {fileID: 1245374894}
+  maxDistance:
+  - 3.4028235e+38
 --- !u!4 &1516145950
 Transform:
   m_ObjectHideFlags: 0
@@ -3647,11 +3827,19 @@ MonoBehaviour:
   - {fileID: 1768818238}
   - {fileID: 1408182352}
   - {fileID: 1481272076}
-  - {fileID: 1527269228}
   - {fileID: 1739119979}
   - {fileID: 2116266219}
   - {fileID: 129492147}
   - {fileID: 1048620051}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &1527269229
 Transform:
   m_ObjectHideFlags: 0
@@ -3699,6 +3887,10 @@ MonoBehaviour:
   - {fileID: 1405855397}
   - {fileID: 645948922}
   - {fileID: 476372991}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &1551177983
 Transform:
   m_ObjectHideFlags: 0
@@ -3836,6 +4028,15 @@ MonoBehaviour:
   - {fileID: 2116266219}
   - {fileID: 727354203}
   - {fileID: 473143005}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &1602148169
 Transform:
   m_ObjectHideFlags: 0
@@ -3883,6 +4084,10 @@ MonoBehaviour:
   - {fileID: 1602148168}
   - {fileID: 727354203}
   - {fileID: 1959964823}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &1608928043
 Transform:
   m_ObjectHideFlags: 0
@@ -3930,6 +4135,10 @@ MonoBehaviour:
   - {fileID: 965851484}
   - {fileID: 473143005}
   - {fileID: 1769341386}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &1616034727
 Transform:
   m_ObjectHideFlags: 0
@@ -3980,9 +4189,17 @@ MonoBehaviour:
   - {fileID: 129492147}
   - {fileID: 180762029}
   - {fileID: 1134915839}
-  - {fileID: 1617048064}
   - {fileID: 406450607}
   - {fileID: 1779920675}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &1617048065
 Transform:
   m_ObjectHideFlags: 0
@@ -4031,11 +4248,19 @@ MonoBehaviour:
   - {fileID: 1408182352}
   - {fileID: 1048620051}
   - {fileID: 331932372}
-  - {fileID: 1621605691}
   - {fileID: 1963150516}
   - {fileID: 1695524619}
   - {fileID: 2116640583}
   - {fileID: 476372991}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &1621605692
 Transform:
   m_ObjectHideFlags: 0
@@ -4169,11 +4394,19 @@ MonoBehaviour:
   - {fileID: 1048620051}
   - {fileID: 476372991}
   - {fileID: 1963150516}
-  - {fileID: 1695524619}
   - {fileID: 2116640583}
   - {fileID: 1879678853}
   - {fileID: 314159924}
   - {fileID: 1054262146}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &1695524620
 Transform:
   m_ObjectHideFlags: 0
@@ -4311,6 +4544,15 @@ MonoBehaviour:
   - {fileID: 948976319}
   - {fileID: 1527269228}
   - {fileID: 1617048064}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &1739119980
 Transform:
   m_ObjectHideFlags: 0
@@ -4363,6 +4605,15 @@ MonoBehaviour:
   - {fileID: 1769341386}
   - {fileID: 1408182352}
   - {fileID: 1512299641}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &1768818239
 Transform:
   m_ObjectHideFlags: 0
@@ -4411,11 +4662,19 @@ MonoBehaviour:
   - {fileID: 1739119979}
   - {fileID: 1768818238}
   - {fileID: 1616034726}
-  - {fileID: 1769341386}
   - {fileID: 530344751}
   - {fileID: 1245374894}
   - {fileID: 951935100}
   - {fileID: 948976319}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &1769341387
 Transform:
   m_ObjectHideFlags: 0
@@ -4477,6 +4736,10 @@ MonoBehaviour:
   - {fileID: 1245374894}
   - {fileID: 948976319}
   - {fileID: 1617048064}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!1 &1866310317
 GameObject:
   m_ObjectHideFlags: 0
@@ -4579,6 +4842,9 @@ MonoBehaviour:
   neighbors:
   - {fileID: 476372991}
   - {fileID: 1695524619}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &1879678854
 Transform:
   m_ObjectHideFlags: 0
@@ -4626,12 +4892,20 @@ MonoBehaviour:
   - {fileID: 727354203}
   - {fileID: 1408182352}
   - {fileID: 1048620051}
-  - {fileID: 1959964823}
   - {fileID: 331932372}
   - {fileID: 1621605691}
   - {fileID: 1963150516}
   - {fileID: 2116266219}
   - {fileID: 1608928042}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &1959964824
 Transform:
   m_ObjectHideFlags: 0
@@ -4764,6 +5038,10 @@ MonoBehaviour:
   - {fileID: 1959964823}
   - {fileID: 1621605691}
   - {fileID: 1695524619}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &1963150517
 Transform:
   m_ObjectHideFlags: 0
@@ -4894,6 +5172,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   neighbors:
   - {fileID: 1602148168}
+  maxDistance:
+  - 3.4028235e+38
 --- !u!4 &2029212080
 Transform:
   m_ObjectHideFlags: 0
@@ -5038,6 +5318,15 @@ MonoBehaviour:
   - {fileID: 727354203}
   - {fileID: 1959964823}
   - {fileID: 1527269228}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &2116266220
 Transform:
   m_ObjectHideFlags: 0
@@ -5084,6 +5373,9 @@ MonoBehaviour:
   neighbors:
   - {fileID: 1621605691}
   - {fileID: 1695524619}
+  maxDistance:
+  - 3.4028235e+38
+  - 3.4028235e+38
 --- !u!4 &2116640584
 Transform:
   m_ObjectHideFlags: 0
