@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -22,7 +23,7 @@ public struct AgentNeighbor {
 public class ORCASystem : SystemBase {
     protected override void OnUpdate()
     {
-        NativeMultiHashMap<int, NeighborData> quadrantMap = QuadrantSystem.quadrantMultiHashMap;
+        NativeMultiHashMap<int, QuadrantData> quadrantMap = QuadrantSystem.quadrantMultiHashMap;
         float radius = 0.6f;
         float timeHorizon = 5.0f;
         float neighborsDist = 15.0f;

@@ -1,12 +1,14 @@
 ﻿using System.Runtime.CompilerServices;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 
-public struct NeighborData {
-    public NeighborData(float2 pos, float2 vel)
+public struct QuadrantData {
+    public QuadrantData(float2 pos, float2 vel)
     {
         position = pos;
         velocity = vel;
@@ -18,16 +20,16 @@ public struct NeighborData {
 
 [UpdateInGroup(typeof(AiGroup))]
 [UpdateAfter(typeof(PathNextStepSystem))]
-public class QuadrantSystem : SystemBase
+public class QuadrantSystem : JobComponentSystem
 {
-    public static NativeMultiHashMap<int, NeighborData> quadrantMultiHashMap;
+    public static NativeMultiHashMap<int, QuadrantData> quadrantMultiHashMap;
     const int quadrantYMultiplier = 1000;
     const int quadrantCellSize = 10;
 
     protected override void OnCreate()
     {
         base.OnCreate();
-        quadrantMultiHashMap = new NativeMultiHashMap<int, NeighborData>(0, Allocator.Persistent);  
+        quadrantMultiHashMap = new NativeMultiHashMap<int, QuadrantData>(0, Allocator.Persistent);  
     }
 
     protected override void OnDestroy()
@@ -36,23 +38,24 @@ public class QuadrantSystem : SystemBase
         quadrantMultiHashMap.Dispose();
     }
 
-    protected override void OnUpdate()
-    {
-        // EntityQuery queryFollower = GetEntityQuery(typeof(FormationFollower));
-        // EntityQuery queryLeader = GetEntityQuery(typeof(FormationLeader));
+    [BurstCompile]
+    struct SetQuadrantDataJob : IJobChunk {
+
+        [ReadOnly] public ArchetypeChunkComponentType<Translation> translationType;
+        [ReadOnly] public ArchetypeChunkComponentType<Velocity> velocityType;
         
-        quadrantMultiHashMap.Clear();
-        // int count = queryFollower.CalculateEntityCount() + queryLeader.CalculateEntityCount();
-        // if (count > quadrantMultiHashMap.Capacity) {
-        //     quadrantMultiHashMap.Capacity = count;
-        // }
+        public NativeMultiHashMap<int, QuadrantData>.ParallelWriter quadrantHashMap;
         
-        //TODO Change to use burst compiler
-        Entities.WithoutBurst().WithAny<FormationFollower, FormationLeader>().ForEach((in Translation translation, in Velocity velocity) =>
-        {
-            int hashMapKey = GetPositionHashMapKey(translation.Value);
-            quadrantMultiHashMap.Add(hashMapKey, new NeighborData(new float2(translation.Value.x, translation.Value.z), velocity.Value));
-        }).Run();
+        public void Execute(ArchetypeChunk chunk, int chunkIndex, int firstEntityIndex) {
+            NativeArray<Translation> chunkTranslations = chunk.GetNativeArray(translationType);
+            NativeArray<Velocity> chunkVelocities = chunk.GetNativeArray(velocityType);
+            
+            for (int i = 0; i < chunk.ChunkEntityCount; i++) {
+
+                int hashMapKey = GetPositionHashMapKey(chunkTranslations[i].Value);
+                quadrantHashMap.Add(hashMapKey, new QuadrantData(new float2(chunkTranslations[i].Value.x, chunkTranslations[i].Value.z), chunkVelocities[i].Value));
+            }
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -135,5 +138,27 @@ public class QuadrantSystem : SystemBase
         }
         
         return neighborsKeys;
+    }
+
+    protected override JobHandle OnUpdate(JobHandle inputDeps)
+    {
+        EntityQuery query = GetEntityQuery(typeof(Translation), typeof(Velocity));
+        
+        quadrantMultiHashMap.Clear();
+        if (query.CalculateEntityCount() > quadrantMultiHashMap.Capacity) {
+            quadrantMultiHashMap.Capacity = query.CalculateEntityCount();
+        }
+        
+        ArchetypeChunkComponentType<Translation> translationChunk =  GetArchetypeChunkComponentType<Translation>();
+        ArchetypeChunkComponentType<Velocity> velocityChunk =  GetArchetypeChunkComponentType<Velocity>();
+
+        //Update quadrants data
+        SetQuadrantDataJob setQuadrantData = new SetQuadrantDataJob() {
+            translationType = translationChunk,
+            velocityType = velocityChunk,
+            quadrantHashMap = quadrantMultiHashMap.AsParallelWriter()
+        };
+
+        return setQuadrantData.Schedule(query, inputDeps);
     }
 }
