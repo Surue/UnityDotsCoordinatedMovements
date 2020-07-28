@@ -66,7 +66,7 @@ public class FormationSetupSystem : SystemBase
         }).Run();
         
         //Update followers
-        Entities.WithoutBurst().ForEach((ref FormationFollower follower) =>
+        Entities.WithoutBurst().ForEach((ref FormationFollower follower, ref Velocity velocity) =>
         {
             for (int i = 0; i < formationEntityToSetup.Length; i++)
             {
@@ -77,7 +77,8 @@ public class FormationSetupSystem : SystemBase
                     //Setup position id
                     follower.positionID = setupData.count;
                     setupData.count++;
-                    
+
+                    velocity.maxSpeed = setupData.formation.speedFormed;
                     
                     formationEntityToSetup[i] = setupData;
                     break;

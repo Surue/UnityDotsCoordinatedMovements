@@ -1,8 +1,10 @@
-﻿using Unity.Collections;
+﻿using System.Diagnostics;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
+using Debug = UnityEngine.Debug;
 
 public struct PairEntityFormation {
     public Entity entity;
@@ -14,18 +16,29 @@ public struct PairEntityFormation {
 public class FormationFollowerSystem : SystemBase {
     private EntityCommandBufferSystem ecbSystem;
 
+    private TimeRecorder timerRecoder;
+
     protected override void OnCreate()
     {
         base.OnCreate();
 
         ecbSystem = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
+        
+        timerRecoder = new TimeRecorder("FormationFollowerSystem");
     }
-
+    static Stopwatch timer = new System.Diagnostics.Stopwatch();
+    private static double time = 0;
     protected override void OnUpdate()
     {
         var ecb = ecbSystem.CreateCommandBuffer().ToConcurrent();
 
         NativeList<PairEntityFormation> formations = new NativeList<PairEntityFormation>(Allocator.TempJob);
+        
+        
+        Job.WithoutBurst().WithCode(() =>
+        {
+            timer.Start();
+        }).Schedule();
 
         //TODO To parallel, Use chunk to bind entity to formation
         Entities.ForEach((Entity entity, in Formation formation) =>
@@ -159,16 +172,29 @@ public class FormationFollowerSystem : SystemBase {
 
             if (formation.state == Formation.State.FORMED)
             {
-                velocity.maxSpeed = formation.speedFormed;
+                velocity.maxSpeed = formation.speedFormed * 0.9f;
             }
             else
             {
-                velocity.maxSpeed = formation.speedForming;
+                velocity.maxSpeed = formation.speedForming * 0.9f;
             }
         }).ScheduleParallel();
 
         Dependency = JobHandle.CombineDependencies(Dependency, formations.Dispose(Dependency));
 
         ecbSystem.AddJobHandleForProducer(Dependency);
+        
+        CompleteDependency();
+
+        Job.WithoutBurst().WithCode(() =>
+        {
+            double ticks = timer.ElapsedTicks;
+            double milliseconds = (ticks / Stopwatch.Frequency) * 1000;
+            
+            time = milliseconds;
+            timer.Stop();
+            timer.Reset();
+        }).Schedule();
+        timerRecoder.RegisterTimeInMS(time);
     }
 }
