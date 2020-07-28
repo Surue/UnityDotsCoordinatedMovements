@@ -73,11 +73,12 @@ public class QuadrantSystem : JobComponentSystem
         Debug.DrawLine(lowerLeft + new Vector3(0, 0, 1) * quadrantCellSize, lowerLeft + new Vector3(1, 0, 1) * quadrantCellSize, color);
     }
 
-    public static NativeList<int> GetCurrentCellAndNeighborsKeys(float3 pos)
+    public static void GetCurrentCellAndNeighborsKeys(float3 pos, ref NativeArray<int> neighborsKey, ref int count)
     {
         int currentKey = GetPositionHashMapKey(pos);
 
-        NativeList<int> neighborsKeys = new NativeList<int>(Allocator.Temp) {currentKey};
+        neighborsKey[0] = currentKey;
+        count++;
 
         float3 lowerLeft = new float3((math.floor(pos.x / quadrantCellSize)) * quadrantCellSize, 0, math.floor(pos.z / quadrantCellSize) * quadrantCellSize);
         float3 topRight = lowerLeft + new float3(1, 0, 1) * quadrantCellSize;
@@ -86,7 +87,8 @@ public class QuadrantSystem : JobComponentSystem
         bool bottom = false;
         if (math.length(math.cross(new float3(1, 0, 0), pos - lowerLeft)) < neighborsCellDistance)
         {
-            neighborsKeys.Add(currentKey - quadrantYMultiplier);
+            neighborsKey[count] = currentKey - quadrantYMultiplier;
+            count++;
             bottom = true;
         } 
         
@@ -94,7 +96,8 @@ public class QuadrantSystem : JobComponentSystem
         bool left = false;
         if (math.length(math.cross(new float3(0, 0, 1), pos - lowerLeft)) < neighborsCellDistance)
         {
-            neighborsKeys.Add(currentKey - 1);
+            neighborsKey[count] = currentKey - 1;
+            count++;
             left = true;
         } 
         
@@ -102,7 +105,8 @@ public class QuadrantSystem : JobComponentSystem
         bool top = false;
         if (math.length(math.cross(new float3(1, 0, 0), pos - topRight)) < neighborsCellDistance)
         {
-            neighborsKeys.Add(currentKey + quadrantYMultiplier);
+            neighborsKey[count] = currentKey + quadrantYMultiplier;
+            count++;
             top = true;
         } 
         
@@ -110,35 +114,38 @@ public class QuadrantSystem : JobComponentSystem
         bool right = false;
         if (math.length(math.cross(new float3(0, 0, 1), pos - topRight)) < neighborsCellDistance)
         {
-            neighborsKeys.Add(currentKey + 1);
+            neighborsKey[count] = currentKey + 1;
+            count++;
             right = true;
         } 
         
         //Check bottomLeft
         if (bottom && left)
         {
-            neighborsKeys.Add(currentKey - quadrantYMultiplier - 1);
+            neighborsKey[count] = currentKey - quadrantYMultiplier - 1;
+            count++;
         }
         
         //Check topLeft
         if (top && left)
         {
-            neighborsKeys.Add(currentKey + quadrantYMultiplier - 1);
+            neighborsKey[count] = currentKey + quadrantYMultiplier - 1;
+            count++;
         }
         
         //Check bottomRight
         if (bottom && right)
         {
-            neighborsKeys.Add(currentKey - quadrantYMultiplier + 1);
+            neighborsKey[count] = currentKey - quadrantYMultiplier + 1;
+            count++;
         }
         
         //Check bottomRight
         if (top && right)
         {
-            neighborsKeys.Add(currentKey + quadrantYMultiplier + 1);
+            neighborsKey[count] = currentKey + quadrantYMultiplier + 1;
+            count++;
         }
-        
-        return neighborsKeys;
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
@@ -150,8 +157,8 @@ public class QuadrantSystem : JobComponentSystem
             quadrantMultiHashMap.Capacity = query.CalculateEntityCount();
         }
         
-        ArchetypeChunkComponentType<Translation> translationChunk =  GetArchetypeChunkComponentType<Translation>();
-        ArchetypeChunkComponentType<Velocity> velocityChunk =  GetArchetypeChunkComponentType<Velocity>();
+        ArchetypeChunkComponentType<Translation> translationChunk =  GetArchetypeChunkComponentType<Translation>(true);
+        ArchetypeChunkComponentType<Velocity> velocityChunk =  GetArchetypeChunkComponentType<Velocity>(true);
 
         //Update quadrants data
         SetQuadrantDataJob setQuadrantData = new SetQuadrantDataJob() {
