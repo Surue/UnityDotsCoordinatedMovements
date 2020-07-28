@@ -73,6 +73,7 @@ public class QuadrantSystem : JobComponentSystem
         Debug.DrawLine(lowerLeft + new Vector3(0, 0, 1) * quadrantCellSize, lowerLeft + new Vector3(1, 0, 1) * quadrantCellSize, color);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void GetCurrentCellAndNeighborsKeys(float3 pos, ref NativeArray<int> neighborsKey, ref int count)
     {
         int currentKey = GetPositionHashMapKey(pos);
