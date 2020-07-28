@@ -24,7 +24,8 @@ public class QuadrantSystem : JobComponentSystem
 {
     public static NativeMultiHashMap<int, QuadrantData> quadrantMultiHashMap;
     const int quadrantYMultiplier = 1000;
-    const int quadrantCellSize = 10;
+    const float quadrantCellSize = 15.0f;
+    const float neighborsCellDistance = quadrantCellSize / 2.0f;
 
     protected override void OnCreate()
     {
@@ -83,7 +84,7 @@ public class QuadrantSystem : JobComponentSystem
         
         //Check bottom
         bool bottom = false;
-        if (math.length(math.cross(new float3(1, 0, 0), pos - lowerLeft)) < 3)
+        if (math.length(math.cross(new float3(1, 0, 0), pos - lowerLeft)) < neighborsCellDistance)
         {
             neighborsKeys.Add(currentKey - quadrantYMultiplier);
             bottom = true;
@@ -91,7 +92,7 @@ public class QuadrantSystem : JobComponentSystem
         
         //Check left
         bool left = false;
-        if (math.length(math.cross(new float3(0, 0, 1), pos - lowerLeft)) < 3)
+        if (math.length(math.cross(new float3(0, 0, 1), pos - lowerLeft)) < neighborsCellDistance)
         {
             neighborsKeys.Add(currentKey - 1);
             left = true;
@@ -99,7 +100,7 @@ public class QuadrantSystem : JobComponentSystem
         
         //Check top
         bool top = false;
-        if (math.length(math.cross(new float3(1, 0, 0), pos - topRight)) < 3)
+        if (math.length(math.cross(new float3(1, 0, 0), pos - topRight)) < neighborsCellDistance)
         {
             neighborsKeys.Add(currentKey + quadrantYMultiplier);
             top = true;
@@ -107,7 +108,7 @@ public class QuadrantSystem : JobComponentSystem
         
         //Check right
         bool right = false;
-        if (math.length(math.cross(new float3(0, 0, 1), pos - topRight)) < 3)
+        if (math.length(math.cross(new float3(0, 0, 1), pos - topRight)) < neighborsCellDistance)
         {
             neighborsKeys.Add(currentKey + 1);
             right = true;

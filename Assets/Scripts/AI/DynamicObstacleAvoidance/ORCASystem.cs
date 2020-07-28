@@ -13,7 +13,6 @@ public struct Line {
 }
 
 public struct AgentNeighbor {
-    public float radius;
     public float2 velocity;
     public float2 position;
 }
@@ -24,38 +23,48 @@ public class ORCASystem : SystemBase {
     protected override void OnUpdate()
     {
         NativeMultiHashMap<int, QuadrantData> quadrantMap = QuadrantSystem.quadrantMultiHashMap;
-        float radius = 0.6f;
-        float timeHorizon = 5.0f;
-        float neighborsDist = 15.0f;
-        int maxNeighbors = 10;
-        float maxSpeed = 5.0f;
+        float radius = Blackboard.Instance.Radius;
+        float timeHorizon = Blackboard.Instance.TimeHorizon;
+        float neighborsDist = Blackboard.Instance.NeighborsDist;
+        int maxNeighbors = Blackboard.Instance.MaxNeighbors;
+        float maxSpeed = Blackboard.Instance.MaxSpeed;
         float dt = UnityEngine.Time.deltaTime;
         float invTimeHorizon = 1.0f / timeHorizon;
         
+        
         //TODO change it to be ScheduleParallel
         Entities.WithReadOnly(quadrantMap).ForEach(
-            (ref Velocity velocity, in ORCATag tag, in Translation translation) =>
+            (int nativeThreadIndex, ref Velocity velocity, in ORCATag tag, in Translation translation) =>
             {
+               
                 if (math.lengthsq(velocity.Value) < 0.001f)
                 {
                     return;
                 }
-                
+
                 //DRAW
                 // QuadrantSystem.DebugDrawQuadrant(translation.Value);
                 
-                NativeList<int> quadrantKeys = new NativeList<int>(Allocator.Temp);
-
-                quadrantKeys = QuadrantSystem.GetCurrentCellAndNeighborsKeys(translation.Value);
+                NativeList<int> quadrantKeys = QuadrantSystem.GetCurrentCellAndNeighborsKeys(translation.Value);
 
                 //ORCA setup
-                NativeList<Line> orcaLines = new NativeList<Line>(Allocator.Temp);
-                NativeList<KeyValuePair<float, AgentNeighbor>> agentNeighbors =
-                    new NativeList<KeyValuePair<float, AgentNeighbor>>(Allocator.Temp);
+                NativeArray<Line> orcaLines = new NativeArray<Line>(maxNeighbors, Allocator.Temp);
+                int neighborsCount = 0;
+                NativeArray<KeyValuePair<float, AgentNeighbor>> agentNeighbors =
+                    new NativeArray<KeyValuePair<float, AgentNeighbor>>(maxNeighbors, Allocator.Temp);
                 float rangeSqr = neighborsDist * neighborsDist;
 
                 int nbObstacleLine = 0;
                 float2 currentPos = translation.Value.xz;
+
+                // if (quadrantMap.IsCreated)
+                // {
+                //     orcaLines.Dispose();
+                //     agentNeighbors.Dispose();
+                //
+                //     quadrantKeys.Dispose();
+                //     return;
+                // }
 
                 for (int i = 0; i < quadrantKeys.Length; i++)
                 {
@@ -73,18 +82,19 @@ public class ORCASystem : SystemBase {
                             if (distSqr < rangeSqr)
                             {
                                 //If there is a free space, add it immediately
-                                if (agentNeighbors.Length < maxNeighbors)
+                                if (neighborsCount < maxNeighbors)
                                 {
-                                    agentNeighbors.Add(new KeyValuePair<float, AgentNeighbor>(distSqr, new AgentNeighbor()
+                                    agentNeighbors[neighborsCount] = new KeyValuePair<float, AgentNeighbor>(distSqr, new AgentNeighbor()
                                     { 
                                         position =  neighbor.position,
-                                        radius =  0.5f,
                                         velocity = neighbor.velocity
-                                    }));
+                                    });
+
+                                    neighborsCount++;
                                 }
                         
                                 //Make sure the list is sorted
-                                int j = agentNeighbors.Length - 1;
+                                int j = neighborsCount - 1;
                                 while (j != 0 && distSqr < agentNeighbors[j - 1].Key)
                                 {
                                     agentNeighbors[j] = agentNeighbors[j - 1];
@@ -95,12 +105,11 @@ public class ORCASystem : SystemBase {
                                 agentNeighbors[j] = new KeyValuePair<float, AgentNeighbor>(distSqr, new AgentNeighbor()
                                 {
                                     position =  neighbor.position,
-                                    radius =  0.5f,
                                     velocity = neighbor.velocity
                                 });
 
                                 //If the list is full, only check agent nearer than the farrest neighbor.
-                                if (agentNeighbors.Length == maxNeighbors)
+                                if (neighborsCount == maxNeighbors)
                                 {
                                     rangeSqr = agentNeighbors[agentNeighbors.Length - 1].Key;
                                 }
@@ -109,7 +118,7 @@ public class ORCASystem : SystemBase {
                     } while (quadrantMap.TryGetNextValue(out neighbor, ref nativeMultiHashMapIterator));
                 }
                 
-                for(int i = 0; i < agentNeighbors.Length; i++)
+                for(int i = 0; i < neighborsCount; i++)
                 {
                     AgentNeighbor otherAgent = agentNeighbors[i].Value;
 
@@ -120,7 +129,7 @@ public class ORCASystem : SystemBase {
                     float2 relativePosition = otherAgent.position - translation.Value.xz;
                     float2 relativeVelocity = velocity.Value - otherAgent.velocity;
                     float distSqr = math.lengthsq(relativePosition);
-                    float combinedRadius = radius + otherAgent.radius;
+                    float combinedRadius = radius * 2.0f;
                     float combinedRadiusSqr = math.pow(combinedRadius, 2);
 
                     Line line;
@@ -183,15 +192,16 @@ public class ORCASystem : SystemBase {
                     }
 
                     line.point = velocity.Value + 0.5f * u;
-                    orcaLines.Add(line);
+                    orcaLines[i] = line;
                 }
 
                 float2 optimalVel = velocity.Value;
-                int lineFail = LinearProgram2(orcaLines, maxSpeed, optimalVel, false, ref velocity.Value);
 
-                if (lineFail < orcaLines.Length)
+                int lineFail = LinearProgram2(orcaLines, neighborsCount, maxSpeed, optimalVel, false, ref velocity.Value);
+
+                if (lineFail < neighborsCount)
                 {
-                    LinearProgram3(orcaLines, nbObstacleLine, lineFail, maxSpeed, ref velocity.Value);
+                    LinearProgram3(orcaLines, neighborsCount, nbObstacleLine, lineFail, maxSpeed, ref velocity.Value);
                 }
 
                 orcaLines.Dispose();
@@ -202,7 +212,7 @@ public class ORCASystem : SystemBase {
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool LinearProgram1(NativeList<Line> lines, int lineNo, float radius, float2 optVelocity, bool directionOpt,
+    private static bool LinearProgram1(NativeArray<Line> lines, int lineNo, float radius, float2 optVelocity, bool directionOpt,
         ref float2 result)
     {
         float dotProduct = math.dot(lines[lineNo].point, lines[lineNo].direction);
@@ -283,7 +293,7 @@ public class ORCASystem : SystemBase {
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int LinearProgram2(NativeList<Line> lines, float radius, float2 optVelocity, bool directionOpt,
+    private static int LinearProgram2(NativeArray<Line> lines, int lineCount, float radius, float2 optVelocity, bool directionOpt,
         ref float2 result)
     {
         if (directionOpt)
@@ -299,7 +309,7 @@ public class ORCASystem : SystemBase {
             result = optVelocity;
         }
 
-        for (int i = 0; i < lines.Length; ++i)
+        for (int i = 0; i < lineCount; ++i)
         {
             if (Det(lines[i].direction, lines[i].point - result) > 0.0f)
             {
@@ -312,15 +322,15 @@ public class ORCASystem : SystemBase {
             }
         }
 
-        return lines.Length;
+        return lineCount;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void LinearProgram3(NativeList<Line> lines, int nbObstacleLine, int beginLine, float radius, ref float2 result)
+    private static void LinearProgram3(NativeArray<Line> lines, int lineCount, int nbObstacleLine, int beginLine, float radius, ref float2 result)
     {
         float distance = 0.0f;
 
-        for (int i = beginLine; i < lines.Length; ++i)
+        for (int i = beginLine; i < lineCount; ++i)
         {
             if (Det(lines[i].direction, lines[i].point - result) > distance)
             {
@@ -358,7 +368,7 @@ public class ORCASystem : SystemBase {
                 }
 
                 float2 tmpResult = result;
-                if (LinearProgram2(projectedLines, radius, new float2(-lines[i].direction.y, lines[i].direction.x),
+                if (LinearProgram2(projectedLines, projectedLines.Length, radius, new float2(-lines[i].direction.y, lines[i].direction.x),
                     true, ref result) < projectedLines.Length)
                 {
                     result = tmpResult;
