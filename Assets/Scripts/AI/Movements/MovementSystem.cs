@@ -7,12 +7,11 @@ using Unity.Transforms;
 /// </summary>
 [UpdateInGroup(typeof(AiGroup), OrderLast = true)]
 [UpdateAfter(typeof(ORCASystem))]
-public class MovementSystem : SystemBase
-{
+public class MovementSystem : SystemBase {
     protected override void OnUpdate()
     {
         float dt = UnityEngine.Time.deltaTime;
-        
+
         Entities.ForEach((ref Translation translation, ref Rotation rotation, in Velocity velocity) =>
         {
             translation.Value += new float3(velocity.Value.x, 0, velocity.Value.y) * dt;

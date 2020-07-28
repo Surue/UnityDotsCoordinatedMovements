@@ -20,9 +20,9 @@ public struct AgentNeighbor {
 [UpdateInGroup(typeof(AiGroup))]
 [UpdateAfter(typeof(VelocitySystem))]
 public class ORCASystem : JobComponentSystem {
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool LinearProgram1(NativeArray<Line> lines, int lineNo, float radius, float2 optVelocity, bool directionOpt,
+    private static bool LinearProgram1(NativeArray<Line> lines, int lineNo, float radius, float2 optVelocity,
+        bool directionOpt,
         ref float2 result)
     {
         float dotProduct = math.dot(lines[lineNo].point, lines[lineNo].direction);
@@ -103,7 +103,8 @@ public class ORCASystem : JobComponentSystem {
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int LinearProgram2(NativeArray<Line> lines, int lineCount, float radius, float2 optVelocity, bool directionOpt,
+    private static int LinearProgram2(NativeArray<Line> lines, int lineCount, float radius, float2 optVelocity,
+        bool directionOpt,
         ref float2 result)
     {
         if (directionOpt)
@@ -122,7 +123,7 @@ public class ORCASystem : JobComponentSystem {
         for (int i = 0; i < lineCount; ++i)
         {
             if (!(Det(lines[i].direction, lines[i].point - result) > 0.0f)) continue;
-            
+
             float2 tmpResult = result;
             if (LinearProgram1(lines, i, radius, optVelocity, directionOpt, ref result)) continue;
             result = tmpResult;
@@ -133,14 +134,15 @@ public class ORCASystem : JobComponentSystem {
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void LinearProgram3(NativeArray<Line> lines, int lineCount, int nbObstacleLine, int beginLine, float radius, ref float2 result)
+    private static void LinearProgram3(NativeArray<Line> lines, int lineCount, int nbObstacleLine, int beginLine,
+        float radius, ref float2 result)
     {
         float distance = 0.0f;
 
         for (int i = beginLine; i < lineCount; ++i)
         {
             if (!(Det(lines[i].direction, lines[i].point - result) > distance)) continue;
-            
+
             NativeList<Line> projectedLines = new NativeList<Line>(Allocator.Temp);
             for (int j = 0; j < nbObstacleLine; j++)
             {
@@ -175,7 +177,8 @@ public class ORCASystem : JobComponentSystem {
             }
 
             float2 tmpResult = result;
-            if (LinearProgram2(projectedLines, projectedLines.Length, radius, new float2(-lines[i].direction.y, lines[i].direction.x),
+            if (LinearProgram2(projectedLines, projectedLines.Length, radius,
+                new float2(-lines[i].direction.y, lines[i].direction.x),
                 true, ref result) < projectedLines.Length)
             {
                 result = tmpResult;
@@ -195,12 +198,14 @@ public class ORCASystem : JobComponentSystem {
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        EntityQuery query = GetEntityQuery(typeof(Velocity), ComponentType.ReadOnly<Translation>(), ComponentType.ReadOnly<ORCATag>());
+        EntityQuery query = GetEntityQuery(typeof(Velocity), ComponentType.ReadOnly<Translation>(),
+            ComponentType.ReadOnly<ORCATag>());
 
-        ArchetypeChunkComponentType<Translation> translationChunk =  GetArchetypeChunkComponentType<Translation>(true);
-        ArchetypeChunkComponentType<Velocity> velocityChunk =  GetArchetypeChunkComponentType<Velocity>(false);
+        ArchetypeChunkComponentType<Translation> translationChunk = GetArchetypeChunkComponentType<Translation>(true);
+        ArchetypeChunkComponentType<Velocity> velocityChunk = GetArchetypeChunkComponentType<Velocity>(false);
 
-        ORCAJob orcaJob = new ORCAJob {
+        ORCAJob orcaJob = new ORCAJob
+        {
             translationType = translationChunk,
             velocityType = velocityChunk,
             quadrantMap = QuadrantSystem.quadrantMultiHashMap,
@@ -216,7 +221,6 @@ public class ORCASystem : JobComponentSystem {
 
     [BurstCompile]
     struct ORCAJob : IJobChunk {
-        
         [ReadOnly] public ArchetypeChunkComponentType<Translation> translationType;
         public ArchetypeChunkComponentType<Velocity> velocityType;
 
@@ -228,23 +232,26 @@ public class ORCASystem : JobComponentSystem {
         public float dt;
 
         private const int MAX_QUADRANT_NEIGHBORS = 4;
+
         public void Execute(ArchetypeChunk chunk, int chunkIndex, int firstEntityIndex)
         {
             NativeArray<Translation> translations = chunk.GetNativeArray(translationType);
             NativeArray<Velocity> velocities = chunk.GetNativeArray(velocityType);
-            
+
             NativeArray<Line> orcaLines = new NativeArray<Line>(maxNeighbors, Allocator.Temp);
-            NativeArray<KeyValuePair<float, AgentNeighbor>> agentNeighbors = new NativeArray<KeyValuePair<float, AgentNeighbor>>(maxNeighbors, Allocator.Temp);
+            NativeArray<KeyValuePair<float, AgentNeighbor>> agentNeighbors =
+                new NativeArray<KeyValuePair<float, AgentNeighbor>>(maxNeighbors, Allocator.Temp);
             NativeArray<int> quadrantKeys = new NativeArray<int>(MAX_QUADRANT_NEIGHBORS, Allocator.Temp);
-            
+
             float invTimeStep = 1.0f / dt;
             float combinedRadius = radius * 2.0f;
             float combinedRadiusSqr = math.pow(combinedRadius, 2);
             float rangeSqr = neighborsDist * neighborsDist;
 
-            for (int entityIdx = 0; entityIdx < chunk.ChunkEntityCount; entityIdx++) {
+            for (int entityIdx = 0; entityIdx < chunk.ChunkEntityCount; entityIdx++)
+            {
                 float2 velocity = velocities[entityIdx].Value;
-                
+
                 //Early exit if the agent is not moving
                 if (math.lengthsq(velocity) < 0.001f)
                 {
@@ -252,7 +259,7 @@ public class ORCASystem : JobComponentSystem {
                 }
 
                 float2 position = translations[entityIdx].Value.xz;
-                
+
                 int countNeighborQuadrant = 0;
                 QuadrantSystem.GetCurrentCellAndNeighborsKeys(position, ref quadrantKeys, ref countNeighborQuadrant);
 
@@ -265,7 +272,8 @@ public class ORCASystem : JobComponentSystem {
                 //Get nearest neighbors
                 for (int i = 0; i < countNeighborQuadrant; i++)
                 {
-                    if (!quadrantMap.TryGetFirstValue(quadrantKeys[i], out var neighbor, out var nativeMultiHashMapIterator))
+                    if (!quadrantMap.TryGetFirstValue(quadrantKeys[i], out var neighbor,
+                        out var nativeMultiHashMapIterator))
                         continue;
                     do
                     {
@@ -277,19 +285,20 @@ public class ORCASystem : JobComponentSystem {
 
                             //If the other agent is under the minimum range => add it
                             if (!(distSqr < rangeSqr)) continue;
-                            
+
                             //If there is a free space, add it immediately
                             if (neighborsCount < maxNeighbors)
                             {
-                                agentNeighbors[neighborsCount] = new KeyValuePair<float, AgentNeighbor>(distSqr, new AgentNeighbor()
-                                { 
-                                    position =  neighbor.position,
-                                    velocity = neighbor.velocity
-                                });
+                                agentNeighbors[neighborsCount] = new KeyValuePair<float, AgentNeighbor>(distSqr,
+                                    new AgentNeighbor()
+                                    {
+                                        position = neighbor.position,
+                                        velocity = neighbor.velocity
+                                    });
 
                                 neighborsCount++;
                             }
-                        
+
                             //Make sure the list is sorted
                             int j = neighborsCount - 1;
                             while (j != 0 && distSqr < agentNeighbors[j - 1].Key)
@@ -297,11 +306,11 @@ public class ORCASystem : JobComponentSystem {
                                 agentNeighbors[j] = agentNeighbors[j - 1];
                                 j--;
                             }
-    
+
                             //Once a spot with a further agent is found, place if 
                             agentNeighbors[j] = new KeyValuePair<float, AgentNeighbor>(distSqr, new AgentNeighbor()
                             {
-                                position =  neighbor.position,
+                                position = neighbor.position,
                                 velocity = neighbor.velocity
                             });
 
@@ -313,16 +322,16 @@ public class ORCASystem : JobComponentSystem {
                         }
                     } while (quadrantMap.TryGetNextValue(out neighbor, ref nativeMultiHashMapIterator));
                 }
-                
-                //Evalute each neighbors
-                for(int neighborIdx = 0; neighborIdx < neighborsCount; neighborIdx++)
+
+                //Evaluate each neighbors
+                for (int neighborIdx = 0; neighborIdx < neighborsCount; neighborIdx++)
                 {
                     AgentNeighbor otherAgent = agentNeighbors[neighborIdx].Value;
 
                     float2 relativePosition = otherAgent.position - position;
                     float2 relativeVelocity = velocity - otherAgent.velocity;
                     float distSqr = math.lengthsq(relativePosition);
-                    
+
                     Line line;
                     float2 u;
 
@@ -337,7 +346,7 @@ public class ORCASystem : JobComponentSystem {
 
                         if (dotProduct1 < 0.0f && math.pow(dotProduct1, 2) > combinedRadiusSqr * wLengthSqr)
                         {
-                            //Project on circle
+                            // Project on circle
                             float wLength = math.sqrt(wLengthSqr);
                             float2 unitW = w / wLength;
 
@@ -346,7 +355,7 @@ public class ORCASystem : JobComponentSystem {
                         }
                         else
                         {
-                            //Projection on legs
+                            // Projection on legs
                             float leg = math.sqrt(distSqr - combinedRadiusSqr);
 
                             if (Det(relativePosition, w) > 0.0f)
@@ -384,7 +393,7 @@ public class ORCASystem : JobComponentSystem {
 
                     orcaLines[neighborIdx] = line;
                 }
-                
+
                 float2 optimalVel = velocity;
                 float2 vel = float2.zero;
                 float maxSpeed = velocities[entityIdx].maxSpeed;
@@ -394,14 +403,14 @@ public class ORCASystem : JobComponentSystem {
                 {
                     LinearProgram3(orcaLines, neighborsCount, nbObstacleLine, lineFail, maxSpeed, ref vel);
                 }
-                
+
                 velocities[entityIdx] = new Velocity()
                 {
                     Value = vel,
                     maxSpeed = maxSpeed
                 };
             }
-            
+
             quadrantKeys.Dispose();
             orcaLines.Dispose();
             agentNeighbors.Dispose();

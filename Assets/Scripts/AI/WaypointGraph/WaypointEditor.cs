@@ -23,7 +23,7 @@ public class WaypointEditor : MonoBehaviour {
     private List<WaypointEditor> previousNeighbors;
     public List<WaypointEditor> neighbors;
     public List<float> maxDistance;
-    
+
     private int index;
 
     public int Index
@@ -51,17 +51,17 @@ public class WaypointEditor : MonoBehaviour {
             {
                 previousNeighbors = new List<WaypointEditor>();
             }
-            
+
             //Add new neighbors
             foreach (var neighbors in neighbors)
             {
-                if(neighbors == null) continue;
+                if (neighbors == null) continue;
                 if (!neighbors.neighbors.Contains(this))
                 {
                     neighbors.neighbors.Add(this);
                 }
             }
-            
+
             previousNeighbors.Clear();
 
             foreach (var waypointEditor in neighbors)
@@ -116,7 +116,8 @@ public class WaypointEditor : MonoBehaviour {
                 Vector3 dir = waypointEditor.transform.position - transform.position;
                 dir.Normalize();
                 Vector3 perp = new Vector3(dir.z, 0, -dir.x);
-                Handles.DrawDottedLine(transform.position + perp * 0.1f, waypointEditor.transform.position + perp * 0.1f, 10);
+                Handles.DrawDottedLine(transform.position + perp * 0.1f,
+                    waypointEditor.transform.position + perp * 0.1f, 10);
             }
         }
     }

@@ -12,21 +12,21 @@ public struct PairEntityFormation {
 [UpdateInGroup(typeof(AiGroup))]
 [UpdateAfter(typeof(FormationLeaderSystem))]
 public class FormationFollowerSystem : SystemBase {
-
     private EntityCommandBufferSystem ecbSystem;
 
     protected override void OnCreate()
     {
         base.OnCreate();
-        
+
         ecbSystem = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
     }
+
     protected override void OnUpdate()
     {
         var ecb = ecbSystem.CreateCommandBuffer().ToConcurrent();
-        
+
         NativeList<PairEntityFormation> formations = new NativeList<PairEntityFormation>(Allocator.TempJob);
-        
+
         //TODO To parallel, Use chunk to bind entity to formation
         Entities.ForEach((Entity entity, in Formation formation) =>
         {
@@ -47,14 +47,14 @@ public class FormationFollowerSystem : SystemBase {
                 }
             });
         }).Schedule();
-        
+
         Entities.WithReadOnly(formations).ForEach((
-            Entity entity, 
+            Entity entity,
             int entityInQueryIndex,
-            DynamicBuffer<PathPositions> pathPositionBuffer, 
-            ref TargetPosition targetPosition, 
-            in PathIndex pathFollow, 
-            in Translation translation, 
+            DynamicBuffer<PathPositions> pathPositionBuffer,
+            ref TargetPosition targetPosition,
+            in PathIndex pathFollow,
+            in Translation translation,
             in FormationFollower follower) =>
         {
             //Get Formation
@@ -67,7 +67,7 @@ public class FormationFollowerSystem : SystemBase {
                     break;
                 }
             }
-            
+
             //Get target position
             float2 tmpPosition = currentFormation.GetTargetPosition(follower.positionID);
 
@@ -85,16 +85,19 @@ public class FormationFollowerSystem : SystemBase {
                         startPos = translation.Value.xz,
                         endPos = tmpPosition
                     });
-                    
+
                     targetPosition.Value = translation.Value.xz;
-                //If distance from last pos in path is too far from the tmpPosition, compute a new path    
-                }else if (math.distance(pathPositionBuffer[0].Value, tmpPosition) > currentFormation.separatedDistance * 2) {
+                    //If distance from last pos in path is too far from the tmpPosition, compute a new path    
+                }
+                else if (math.distance(pathPositionBuffer[0].Value, tmpPosition) >
+                         currentFormation.separatedDistance * 2)
+                {
                     ecb.AddComponent(entityInQueryIndex, entity, new PathFindingRequest()
                     {
                         startPos = translation.Value.xz,
                         endPos = tmpPosition
                     });
-                    
+
                     targetPosition.Value = translation.Value.xz;
                 }
                 else
@@ -107,14 +110,13 @@ public class FormationFollowerSystem : SystemBase {
                 targetPosition.Value = tmpPosition;
             }
         }).ScheduleParallel();
-        
+
         //TODO Must be parallelized
         //Define if formation are forming or formed
         Entities.ForEach((
-            in PathIndex pathFollow, 
+            in PathIndex pathFollow,
             in FormationFollower follower) =>
         {
-
             //Get target position
             if (pathFollow.Value != -1)
             {
@@ -138,7 +140,7 @@ public class FormationFollowerSystem : SystemBase {
                 };
             }
         }).Run();
-        
+
         //Set speed for leader
         Entities.WithReadOnly(formations).ForEach((
             ref Velocity velocity,
@@ -166,7 +168,7 @@ public class FormationFollowerSystem : SystemBase {
         }).ScheduleParallel();
 
         Dependency = JobHandle.CombineDependencies(Dependency, formations.Dispose(Dependency));
-        
+
         ecbSystem.AddJobHandleForProducer(Dependency);
     }
 }

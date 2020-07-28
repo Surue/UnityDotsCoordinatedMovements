@@ -1,11 +1,10 @@
 ﻿using System;
 using Unity.Entities;
 using Unity.Mathematics;
-using UnityEngine;
 
 [GenerateAuthoringComponent]
 public struct Formation : IComponentData {
-    public enum State : short{
+    public enum State : short {
         FORMING,
         FORMED,
     }
@@ -17,7 +16,7 @@ public struct Formation : IComponentData {
     }
 
     public int nbAgent;
-    
+
     public State state;
     public Shape shape;
     public float speedForming;
@@ -25,7 +24,7 @@ public struct Formation : IComponentData {
     public float separatedDistance;
 
     public float agentSpacing;
-    
+
     public float2 referentialPosition;
     public float2 referentialForward;
 
@@ -36,16 +35,18 @@ public struct Formation : IComponentData {
             case Shape.LINE:
                 if (index % 2 == 0)
                 {
-                    return referentialPosition + new float2(referentialForward.y, -referentialForward.x) * (index / 2.0f * agentSpacing);
+                    return referentialPosition + new float2(referentialForward.y, -referentialForward.x) *
+                        (index / 2.0f * agentSpacing);
                 }
                 else
                 {
-                    return referentialPosition - new float2(referentialForward.y, -referentialForward.x) * (math.ceil(index / 2.0f) * agentSpacing);
+                    return referentialPosition - new float2(referentialForward.y, -referentialForward.x) *
+                        (math.ceil(index / 2.0f) * agentSpacing);
                 }
             case Shape.COLUMN:
                 return referentialPosition - referentialForward * index * agentSpacing;
             case Shape.SQUARE:
-                int maxCol = (int)math.floor(math.sqrt(nbAgent));
+                int maxCol = (int) math.floor(math.sqrt(nbAgent));
 
                 int col = index % maxCol;
                 int row = index / maxCol;
@@ -58,8 +59,9 @@ public struct Formation : IComponentData {
                 }
                 else
                 {
-                    return referentialPosition - 
-                           new float2(referentialForward.y, -referentialForward.x) * (math.ceil(col / 2.0f) * agentSpacing) -
+                    return referentialPosition -
+                           new float2(referentialForward.y, -referentialForward.x) *
+                           (math.ceil(col / 2.0f) * agentSpacing) -
                            referentialForward * (row * agentSpacing);
                 }
             default:

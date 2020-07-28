@@ -4,18 +4,16 @@ using Unity.Transforms;
 
 [UpdateInGroup(typeof(AiGroup))]
 [UpdateAfter(typeof(QuadrantSystem))]
-public class VelocitySystem : SystemBase
-{
+public class VelocitySystem : SystemBase {
     protected override void OnUpdate()
     {
         float stoppingDistance = 0.1f;
         float slowdownDistance = 1.0f;
-        
-        //TODO use FormationLeader and FormationFollower to get the correct speed
+
         Entities.ForEach((ref Velocity vel, in TargetPosition targetPosition, in Translation translation) =>
         {
             float dist = math.distance(translation.Value.xz, targetPosition.Value);
-            
+
             if (dist < stoppingDistance)
             {
                 vel.Value = float2.zero;

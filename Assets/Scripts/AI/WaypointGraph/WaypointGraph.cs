@@ -5,9 +5,8 @@ using UnityEditor;
 using UnityEngine;
 
 public class WaypointGraph : MonoBehaviour {
-
     public static WaypointGraph Instance;
-    
+
     private NativeArray<Waypoint> waypoints;
     private NativeArray<WaypointNeighbors> neighbors;
 
@@ -31,14 +30,14 @@ public class WaypointGraph : MonoBehaviour {
         var tmpWaypoints = GetComponentsInChildren<WaypointEditor>();
 
         waypoints = new NativeArray<Waypoint>(tmpWaypoints.Length, Allocator.Persistent);
-        
+
 
         //Set index for every waypoint in scene and count neighbors
         int neighborsCount = 0;
         for (int i = 0; i < tmpWaypoints.Length; i++)
         {
             tmpWaypoints[i].Index = i;
-            
+
             //New waypoint
             waypoints[i] = new Waypoint()
             {
@@ -46,16 +45,17 @@ public class WaypointGraph : MonoBehaviour {
                 firstNeighbors = neighborsCount,
                 neigborCount = tmpWaypoints[i].neighbors.Count
             };
-            
+
             neighborsCount += tmpWaypoints[i].neighbors.Count;
         }
+
         neighbors = new NativeArray<WaypointNeighbors>(neighborsCount, Allocator.Persistent);
 
         //Construct neighbors
         for (int i = 0; i < waypoints.Length; i++)
         {
             Vector3 pos = tmpWaypoints[i].transform.position;
-            
+
             //Get all neighbors
             for (int j = 0; j < waypoints[i].neigborCount; j++)
             {
@@ -66,11 +66,9 @@ public class WaypointGraph : MonoBehaviour {
                     moveCost = Vector3.Distance(pos, tmpWaypoints[neighborIndex].transform.position),
                     neighborsIndex = neighborIndex
                 };
-
-                // Debug.Log("["+j+"] = " + (waypoints[i].firstNeighbors + j));
             }
         }
-        
+
         //Destroy old waypoint
         for (int i = tmpWaypoints.Length - 1; i >= 0; i--)
         {
@@ -103,9 +101,9 @@ public class WaypointGraph : MonoBehaviour {
                         waypoints[neighborIndex].position.y);
 
                     Vector3 dir = pos - neighborPos;
-                    
+
                     Vector3 perp = new Vector3(dir.z, 0, -dir.x).normalized;
-                    
+
                     Gizmos.DrawLine(pos + perp * 0.1f, neighborPos + perp * 0.1f);
                 }
             }
@@ -115,7 +113,7 @@ public class WaypointGraph : MonoBehaviour {
 
 #if UNITY_EDITOR
 [CustomEditor(typeof(WaypointGraph))]
-public class WaypointGraphEditor : Editor{
+public class WaypointGraphEditor : Editor {
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();

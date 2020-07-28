@@ -1,6 +1,5 @@
 using Unity.Entities;
 
 [GenerateAuthoringComponent]
-public struct FormationRegisterTag : IComponentData{
-    
+public struct FormationRegisterTag : IComponentData {
 }

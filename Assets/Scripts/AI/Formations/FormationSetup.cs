@@ -6,4 +6,3 @@ public struct FormationSetup : IComponentData {
     public Color leaderColor;
     public Color followerColor;
 }
-    

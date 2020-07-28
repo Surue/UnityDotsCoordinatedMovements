@@ -4,8 +4,7 @@ using Unity.Transforms;
 
 [UpdateInGroup(typeof(AiGroup))]
 [UpdateAfter(typeof(PathFinderSystem))]
-public class PathNextStepSystem : SystemBase
-{
+public class PathNextStepSystem : SystemBase {
     protected override void OnUpdate()
     {
         //Dynamic buffer must be at the start
@@ -13,7 +12,7 @@ public class PathNextStepSystem : SystemBase
         {
             //TODO Not good for //
             if (pathFollow.Value == -1) return;
-            
+
             if (math.distance(position.Value.xz, targetPosition.Value) < 0.55f)
             {
                 pathFollow.Value--;
