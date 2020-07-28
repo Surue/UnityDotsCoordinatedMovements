@@ -53,15 +53,15 @@ public class QuadrantSystem : JobComponentSystem
             
             for (int i = 0; i < chunk.ChunkEntityCount; i++) {
 
-                int hashMapKey = GetPositionHashMapKey(chunkTranslations[i].Value);
+                int hashMapKey = GetPositionHashMapKey(chunkTranslations[i].Value.xz);
                 quadrantHashMap.Add(hashMapKey, new QuadrantData(new float2(chunkTranslations[i].Value.x, chunkTranslations[i].Value.z), chunkVelocities[i].Value));
             }
         }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int GetPositionHashMapKey(float3 pos) {
-        return (int)math.floor(pos.x / quadrantCellSize) + (int)(quadrantYMultiplier * math.floor(pos.z / quadrantCellSize));
+    public static int GetPositionHashMapKey(float2 pos) {
+        return (int)math.floor(pos.x / quadrantCellSize) + (int)(quadrantYMultiplier * math.floor(pos.y / quadrantCellSize));
     }
     
     public static void DebugDrawQuadrant(float3 pos) {
@@ -74,79 +74,75 @@ public class QuadrantSystem : JobComponentSystem
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void GetCurrentCellAndNeighborsKeys(float3 pos, ref NativeArray<int> neighborsKey, ref int count)
+    public static void GetCurrentCellAndNeighborsKeys(float2 pos, ref NativeArray<int> neighborsKey, ref int count)
     {
         int currentKey = GetPositionHashMapKey(pos);
 
         neighborsKey[0] = currentKey;
         count++;
 
-        float3 lowerLeft = new float3((math.floor(pos.x / quadrantCellSize)) * quadrantCellSize, 0, math.floor(pos.z / quadrantCellSize) * quadrantCellSize);
-        float3 topRight = lowerLeft + new float3(1, 0, 1) * quadrantCellSize;
+        float2 lowerLeft = new float2((math.floor(pos.x / quadrantCellSize)) * quadrantCellSize, math.floor(pos.y / quadrantCellSize) * quadrantCellSize);
+        float2 topRight = lowerLeft + new float2(1,  1) * quadrantCellSize;
         
-        //Check bottom
+        //Check bottom and top
         bool bottom = false;
-        if (math.length(math.cross(new float3(1, 0, 0), pos - lowerLeft)) < neighborsCellDistance)
+        bool top = false;
+        if (math.length(Det(new float2(1, 0), pos - lowerLeft)) < neighborsCellDistance)
         {
             neighborsKey[count] = currentKey - quadrantYMultiplier;
             count++;
             bottom = true;
-        } 
-        
-        //Check left
-        bool left = false;
-        if (math.length(math.cross(new float3(0, 0, 1), pos - lowerLeft)) < neighborsCellDistance)
-        {
-            neighborsKey[count] = currentKey - 1;
-            count++;
-            left = true;
-        } 
-        
-        //Check top
-        bool top = false;
-        if (math.length(math.cross(new float3(1, 0, 0), pos - topRight)) < neighborsCellDistance)
+        } else if (math.length(Det(new float2(1, 0), pos - topRight)) < neighborsCellDistance)
         {
             neighborsKey[count] = currentKey + quadrantYMultiplier;
             count++;
             top = true;
         } 
         
-        //Check right
-        bool right = false;
-        if (math.length(math.cross(new float3(0, 0, 1), pos - topRight)) < neighborsCellDistance)
+        //Check left
+        if (math.length(Det(new float2(0,  1), pos - lowerLeft)) < neighborsCellDistance)
+        {
+            neighborsKey[count] = currentKey - 1;
+            count++;
+            
+            //Check bottomLeft
+            if (bottom)
+            {
+                neighborsKey[count] = currentKey - quadrantYMultiplier - 1;
+                count++;
+            }
+            
+            //Check topLeft
+            if (top)
+            {
+                neighborsKey[count] = currentKey + quadrantYMultiplier - 1;
+                count++;
+            }
+        } else if (math.length(Det(new float2(0,  1), pos - topRight)) < neighborsCellDistance)
         {
             neighborsKey[count] = currentKey + 1;
             count++;
-            right = true;
-        } 
-        
-        //Check bottomLeft
-        if (bottom && left)
-        {
-            neighborsKey[count] = currentKey - quadrantYMultiplier - 1;
-            count++;
+
+            //Check bottomRight
+            if (bottom)
+            {
+                neighborsKey[count] = currentKey - quadrantYMultiplier + 1;
+                count++;
+            }
+
+            //Check bottomRight
+            if (top)
+            {
+                neighborsKey[count] = currentKey + quadrantYMultiplier + 1;
+                count++;
+            }
         }
-        
-        //Check topLeft
-        if (top && left)
-        {
-            neighborsKey[count] = currentKey + quadrantYMultiplier - 1;
-            count++;
-        }
-        
-        //Check bottomRight
-        if (bottom && right)
-        {
-            neighborsKey[count] = currentKey - quadrantYMultiplier + 1;
-            count++;
-        }
-        
-        //Check bottomRight
-        if (top && right)
-        {
-            neighborsKey[count] = currentKey + quadrantYMultiplier + 1;
-            count++;
-        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static float Det(float2 v1, float2 v2)
+    {
+        return v1.x * v2.y - v1.y * v2.y;
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)

@@ -6,7 +6,6 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine;
 
 public struct Line {
     public float2 direction;
@@ -21,196 +20,6 @@ public struct AgentNeighbor {
 [UpdateInGroup(typeof(AiGroup))]
 [UpdateAfter(typeof(VelocitySystem))]
 public class ORCASystem : JobComponentSystem {
-    // protected override void OnUpdate()
-    // {
-    //     NativeMultiHashMap<int, QuadrantData> quadrantMap = QuadrantSystem.quadrantMultiHashMap;
-    //     float radius = Blackboard.Instance.Radius;
-    //     float timeHorizon = Blackboard.Instance.TimeHorizon;
-    //     float neighborsDist = Blackboard.Instance.NeighborsDist;
-    //     int maxNeighbors = Blackboard.Instance.MaxNeighbors;
-    //     float maxSpeed = Blackboard.Instance.MaxSpeed;
-    //     float dt = UnityEngine.Time.deltaTime;
-    //     float invTimeHorizon = 1.0f / timeHorizon;
-    //     
-    //     //TODO change it to be ScheduleParallel
-    //     Entities.WithReadOnly(quadrantMap).ForEach(
-    //         (int nativeThreadIndex, ref Velocity velocity, in ORCATag tag, in Translation translation) =>
-    //         {
-    //            
-    //             if (math.lengthsq(velocity.Value) < 0.001f)
-    //             {
-    //                 return;
-    //             }
-    //
-    //             //DRAW
-    //             // QuadrantSystem.DebugDrawQuadrant(translation.Value);
-    //             
-    //             NativeList<int> quadrantKeys = QuadrantSystem.GetCurrentCellAndNeighborsKeys(translation.Value);
-    //
-    //             //ORCA setup
-    //             NativeArray<Line> orcaLines = new NativeArray<Line>(maxNeighbors, Allocator.Temp);
-    //             int neighborsCount = 0;
-    //             NativeArray<KeyValuePair<float, AgentNeighbor>> agentNeighbors =
-    //                 new NativeArray<KeyValuePair<float, AgentNeighbor>>(maxNeighbors, Allocator.Temp);
-    //             float rangeSqr = neighborsDist * neighborsDist;
-    //
-    //             int nbObstacleLine = 0;
-    //             float2 currentPos = translation.Value.xz;
-    //
-    //             // if (quadrantMap.IsCreated)
-    //             // {
-    //             //     orcaLines.Dispose();
-    //             //     agentNeighbors.Dispose();
-    //             //
-    //             //     quadrantKeys.Dispose();
-    //             //     return;
-    //             // }
-    //
-    //             for (int i = 0; i < quadrantKeys.Length; i++)
-    //             {
-    //                 if (!quadrantMap.TryGetFirstValue(quadrantKeys[i], out var neighbor, out var nativeMultiHashMapIterator))
-    //                     continue;
-    //                 do
-    //                 {
-    //                     //TODO use better condition
-    //                     if (math.distancesq(neighbor.position, currentPos) > 0.001f)
-    //                     {
-    //                         float2 dir = currentPos - neighbor.position;
-    //                         float distSqr = math.dot(dir, dir);
-    //
-    //                         //If the other agent is under the minimum range => add it
-    //                         if (distSqr < rangeSqr)
-    //                         {
-    //                             //If there is a free space, add it immediately
-    //                             if (neighborsCount < maxNeighbors)
-    //                             {
-    //                                 agentNeighbors[neighborsCount] = new KeyValuePair<float, AgentNeighbor>(distSqr, new AgentNeighbor()
-    //                                 { 
-    //                                     position =  neighbor.position,
-    //                                     velocity = neighbor.velocity
-    //                                 });
-    //
-    //                                 neighborsCount++;
-    //                             }
-    //                     
-    //                             //Make sure the list is sorted
-    //                             int j = neighborsCount - 1;
-    //                             while (j != 0 && distSqr < agentNeighbors[j - 1].Key)
-    //                             {
-    //                                 agentNeighbors[j] = agentNeighbors[j - 1];
-    //                                 j--;
-    //                             }
-    //
-    //                             //Once a spot with a further agent is found, place if 
-    //                             agentNeighbors[j] = new KeyValuePair<float, AgentNeighbor>(distSqr, new AgentNeighbor()
-    //                             {
-    //                                 position =  neighbor.position,
-    //                                 velocity = neighbor.velocity
-    //                             });
-    //
-    //                             //If the list is full, only check agent nearer than the farrest neighbor.
-    //                             if (neighborsCount == maxNeighbors)
-    //                             {
-    //                                 rangeSqr = agentNeighbors[agentNeighbors.Length - 1].Key;
-    //                             }
-    //                         }
-    //                     }
-    //                 } while (quadrantMap.TryGetNextValue(out neighbor, ref nativeMultiHashMapIterator));
-    //             }
-    //             
-    //             for(int i = 0; i < neighborsCount; i++)
-    //             {
-    //                 AgentNeighbor otherAgent = agentNeighbors[i].Value;
-    //
-    //                 //DRAW
-    //                 // Debug.DrawLine(translation.Value,
-    //                 //     new Vector3(otherAgent.position.x, translation.Value.y, otherAgent.position.y));
-    //                 
-    //                 float2 relativePosition = otherAgent.position - translation.Value.xz;
-    //                 float2 relativeVelocity = velocity.Value - otherAgent.velocity;
-    //                 float distSqr = math.lengthsq(relativePosition);
-    //                 float combinedRadius = radius * 2.0f;
-    //                 float combinedRadiusSqr = math.pow(combinedRadius, 2);
-    //
-    //                 Line line;
-    //                 float2 u;
-    //
-    //                 if (distSqr > combinedRadiusSqr)
-    //                 {
-    //                     // No Collision
-    //                     float2 w = relativeVelocity - invTimeHorizon * relativePosition;
-    //
-    //                     // Vector from center to relative velocity
-    //                     float wLengthSqr = math.lengthsq(w);
-    //                     float dotProduct1 = math.dot(w, relativePosition);
-    //
-    //                     if (dotProduct1 < 0.0f && math.pow(dotProduct1, 2) > combinedRadiusSqr * wLengthSqr)
-    //                     {
-    //                         //Project on circle
-    //                         float wLength = math.sqrt(wLengthSqr);
-    //                         float2 unitW = w / wLength;
-    //
-    //                         line.direction = new float2(unitW.y, -unitW.x);
-    //                         u = (combinedRadius * invTimeHorizon - wLength) * unitW;
-    //                     }
-    //                     else
-    //                     {
-    //                         //Projection on legs
-    //                         float leg = math.sqrt(distSqr - combinedRadiusSqr);
-    //
-    //                         if (Det(relativePosition, w) > 0.0f)
-    //                         {
-    //                             line.direction = new float2(
-    //                                                  relativePosition.x * leg - relativePosition.y * combinedRadius,
-    //                                                  relativePosition.x * combinedRadius + relativePosition.y * leg) /
-    //                                              distSqr;
-    //                         }
-    //                         else
-    //                         {
-    //                             line.direction = -new float2(
-    //                                                  relativePosition.x * leg - relativePosition.y * combinedRadius,
-    //                                                  -relativePosition.x * combinedRadius + relativePosition.y * leg) /
-    //                                              distSqr;
-    //                         }
-    //
-    //                         float dotProduct2 = math.dot(relativeVelocity, line.direction);
-    //                         u = dotProduct2 * line.direction - relativeVelocity;
-    //                     }
-    //                 }
-    //                 else
-    //                 {
-    //                     //Collision
-    //                     float invTimeStep = 1.0f / dt;
-    //
-    //                     float2 w = relativeVelocity - invTimeStep * relativePosition;
-    //
-    //                     float wLength = math.length(w);
-    //                     float2 wUnit = w / wLength;
-    //
-    //                     line.direction = new float2(wUnit.y, -wUnit.x);
-    //                     u = (combinedRadius * invTimeStep - wLength) * wUnit;
-    //                 }
-    //
-    //                 line.point = velocity.Value + 0.5f * u;
-    //
-    //                 orcaLines[i] = line;
-    //             }
-    //
-    //             float2 optimalVel = velocity.Value;
-    //
-    //             int lineFail = LinearProgram2(orcaLines, neighborsCount, maxSpeed, optimalVel, false, ref velocity.Value);
-    //
-    //             if (lineFail < neighborsCount)
-    //             {
-    //                 LinearProgram3(orcaLines, neighborsCount, nbObstacleLine, lineFail, maxSpeed, ref velocity.Value);
-    //             }
-    //
-    //             orcaLines.Dispose();
-    //             agentNeighbors.Dispose();
-    //
-    //             quadrantKeys.Dispose();
-    //         }).ScheduleParallel();
-    // }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool LinearProgram1(NativeArray<Line> lines, int lineNo, float radius, float2 optVelocity, bool directionOpt,
@@ -312,15 +121,12 @@ public class ORCASystem : JobComponentSystem {
 
         for (int i = 0; i < lineCount; ++i)
         {
-            if (Det(lines[i].direction, lines[i].point - result) > 0.0f)
-            {
-                float2 tmpResult = result;
-                if (!LinearProgram1(lines, i, radius, optVelocity, directionOpt, ref result))
-                {
-                    result = tmpResult;
-                    return i;
-                }
-            }
+            if (!(Det(lines[i].direction, lines[i].point - result) > 0.0f)) continue;
+            
+            float2 tmpResult = result;
+            if (LinearProgram1(lines, i, radius, optVelocity, directionOpt, ref result)) continue;
+            result = tmpResult;
+            return i;
         }
 
         return lineCount;
@@ -333,52 +139,51 @@ public class ORCASystem : JobComponentSystem {
 
         for (int i = beginLine; i < lineCount; ++i)
         {
-            if (Det(lines[i].direction, lines[i].point - result) > distance)
+            if (!(Det(lines[i].direction, lines[i].point - result) > distance)) continue;
+            
+            NativeList<Line> projectedLines = new NativeList<Line>(Allocator.Temp);
+            for (int j = 0; j < nbObstacleLine; j++)
             {
-                NativeList<Line> projectedLines = new NativeList<Line>(Allocator.Temp);
-                for (int j = 0; j < nbObstacleLine; j++)
-                {
-                    projectedLines.Add(lines[j]);
-                }
-
-                for (int j = nbObstacleLine; j < i; j++)
-                {
-                    Line line;
-
-                    float determinant = Det(lines[i].direction, lines[j].direction);
-
-                    if (math.abs(determinant) <= 0.000001f)
-                    {
-                        if (math.dot(lines[i].direction, lines[j].direction) > 0.0f)
-                        {
-                            //Line i and j are in the same direction
-                            continue;
-                        }
-
-                        line.point = 0.5f * (lines[i].point + lines[j].point);
-                    }
-                    else
-                    {
-                        line.point = lines[i].point +
-                                     (Det(lines[j].direction, lines[i].point - lines[j].point) /
-                                      determinant) * lines[i].direction;
-                    }
-
-                    line.direction = math.normalize(lines[j].direction - lines[i].direction);
-                    projectedLines.Add(line);
-                }
-
-                float2 tmpResult = result;
-                if (LinearProgram2(projectedLines, projectedLines.Length, radius, new float2(-lines[i].direction.y, lines[i].direction.x),
-                    true, ref result) < projectedLines.Length)
-                {
-                    result = tmpResult;
-                }
-
-                distance = Det(lines[i].direction, lines[i].point - result);
-
-                projectedLines.Dispose();
+                projectedLines.Add(lines[j]);
             }
+
+            for (int j = nbObstacleLine; j < i; j++)
+            {
+                Line line;
+
+                float determinant = Det(lines[i].direction, lines[j].direction);
+
+                if (math.abs(determinant) <= 0.000001f)
+                {
+                    if (math.dot(lines[i].direction, lines[j].direction) > 0.0f)
+                    {
+                        //Line i and j are in the same direction
+                        continue;
+                    }
+
+                    line.point = 0.5f * (lines[i].point + lines[j].point);
+                }
+                else
+                {
+                    line.point = lines[i].point +
+                                 (Det(lines[j].direction, lines[i].point - lines[j].point) /
+                                  determinant) * lines[i].direction;
+                }
+
+                line.direction = math.normalize(lines[j].direction - lines[i].direction);
+                projectedLines.Add(line);
+            }
+
+            float2 tmpResult = result;
+            if (LinearProgram2(projectedLines, projectedLines.Length, radius, new float2(-lines[i].direction.y, lines[i].direction.x),
+                true, ref result) < projectedLines.Length)
+            {
+                result = tmpResult;
+            }
+
+            distance = Det(lines[i].direction, lines[i].point - result);
+
+            projectedLines.Dispose();
         }
     }
 
@@ -395,7 +200,7 @@ public class ORCASystem : JobComponentSystem {
         ArchetypeChunkComponentType<Translation> translationChunk =  GetArchetypeChunkComponentType<Translation>(true);
         ArchetypeChunkComponentType<Velocity> velocityChunk =  GetArchetypeChunkComponentType<Velocity>(false);
 
-        ORCAJob orcaJob = new ORCAJob() {
+        ORCAJob orcaJob = new ORCAJob {
             translationType = translationChunk,
             velocityType = velocityChunk,
             quadrantMap = QuadrantSystem.quadrantMultiHashMap,
@@ -421,6 +226,8 @@ public class ORCASystem : JobComponentSystem {
         public float radius;
         public float invTimeHorizon;
         public float dt;
+
+        private const int MAX_QUADRANT_NEIGHBORS = 4;
         public void Execute(ArchetypeChunk chunk, int chunkIndex, int firstEntityIndex)
         {
             NativeArray<Translation> translations = chunk.GetNativeArray(translationType);
@@ -428,24 +235,34 @@ public class ORCASystem : JobComponentSystem {
             
             NativeArray<Line> orcaLines = new NativeArray<Line>(maxNeighbors, Allocator.Temp);
             NativeArray<KeyValuePair<float, AgentNeighbor>> agentNeighbors = new NativeArray<KeyValuePair<float, AgentNeighbor>>(maxNeighbors, Allocator.Temp);
-            NativeArray<int> quadrantKeys = new NativeArray<int>(9, Allocator.Temp);
+            NativeArray<int> quadrantKeys = new NativeArray<int>(MAX_QUADRANT_NEIGHBORS, Allocator.Temp);
             
-            for (int entityID = 0; entityID < chunk.ChunkEntityCount; entityID++) {
-                if (math.lengthsq(velocities[entityID].Value) < 0.001f)
+            float invTimeStep = 1.0f / dt;
+            float combinedRadius = radius * 2.0f;
+            float combinedRadiusSqr = math.pow(combinedRadius, 2);
+            float rangeSqr = neighborsDist * neighborsDist;
+
+            for (int entityIdx = 0; entityIdx < chunk.ChunkEntityCount; entityIdx++) {
+                float2 velocity = velocities[entityIdx].Value;
+                
+                //Early exit if the agent is not moving
+                if (math.lengthsq(velocity) < 0.001f)
                 {
                     continue;
                 }
 
+                float2 position = translations[entityIdx].Value.xz;
+                
                 int countNeighborQuadrant = 0;
-                QuadrantSystem.GetCurrentCellAndNeighborsKeys(translations[entityID].Value, ref quadrantKeys, ref countNeighborQuadrant);
+                QuadrantSystem.GetCurrentCellAndNeighborsKeys(position, ref quadrantKeys, ref countNeighborQuadrant);
 
                 //ORCA setup
                 int neighborsCount = 0;
-                float rangeSqr = neighborsDist * neighborsDist;
 
                 int nbObstacleLine = 0;
-                float2 currentPos = translations[entityID].Value.xz;
+                float2 currentPos = position;
 
+                //Get nearest neighbors
                 for (int i = 0; i < countNeighborQuadrant; i++)
                 {
                     if (!quadrantMap.TryGetFirstValue(quadrantKeys[i], out var neighbor, out var nativeMultiHashMapIterator))
@@ -459,55 +276,53 @@ public class ORCASystem : JobComponentSystem {
                             float distSqr = math.dot(dir, dir);
 
                             //If the other agent is under the minimum range => add it
-                            if (distSqr < rangeSqr)
+                            if (!(distSqr < rangeSqr)) continue;
+                            
+                            //If there is a free space, add it immediately
+                            if (neighborsCount < maxNeighbors)
                             {
-                                //If there is a free space, add it immediately
-                                if (neighborsCount < maxNeighbors)
-                                {
-                                    agentNeighbors[neighborsCount] = new KeyValuePair<float, AgentNeighbor>(distSqr, new AgentNeighbor()
-                                    { 
-                                        position =  neighbor.position,
-                                        velocity = neighbor.velocity
-                                    });
-
-                                    neighborsCount++;
-                                }
-                        
-                                //Make sure the list is sorted
-                                int j = neighborsCount - 1;
-                                while (j != 0 && distSqr < agentNeighbors[j - 1].Key)
-                                {
-                                    agentNeighbors[j] = agentNeighbors[j - 1];
-                                    j--;
-                                }
-    
-                                //Once a spot with a further agent is found, place if 
-                                agentNeighbors[j] = new KeyValuePair<float, AgentNeighbor>(distSqr, new AgentNeighbor()
-                                {
+                                agentNeighbors[neighborsCount] = new KeyValuePair<float, AgentNeighbor>(distSqr, new AgentNeighbor()
+                                { 
                                     position =  neighbor.position,
                                     velocity = neighbor.velocity
                                 });
 
-                                //If the list is full, only check agent nearer than the farrest neighbor.
-                                if (neighborsCount == maxNeighbors)
-                                {
-                                    rangeSqr = agentNeighbors[agentNeighbors.Length - 1].Key;
-                                }
+                                neighborsCount++;
+                            }
+                        
+                            //Make sure the list is sorted
+                            int j = neighborsCount - 1;
+                            while (j != 0 && distSqr < agentNeighbors[j - 1].Key)
+                            {
+                                agentNeighbors[j] = agentNeighbors[j - 1];
+                                j--;
+                            }
+    
+                            //Once a spot with a further agent is found, place if 
+                            agentNeighbors[j] = new KeyValuePair<float, AgentNeighbor>(distSqr, new AgentNeighbor()
+                            {
+                                position =  neighbor.position,
+                                velocity = neighbor.velocity
+                            });
+
+                            //If the list is full, only check agent nearer than the farrest neighbor.
+                            if (neighborsCount == maxNeighbors)
+                            {
+                                rangeSqr = agentNeighbors[maxNeighbors - 1].Key;
                             }
                         }
                     } while (quadrantMap.TryGetNextValue(out neighbor, ref nativeMultiHashMapIterator));
                 }
                 
-                for(int i = 0; i < neighborsCount; i++)
+                //Evalute each neighbors
+                for(int neighborIdx = 0; neighborIdx < neighborsCount; neighborIdx++)
                 {
-                    AgentNeighbor otherAgent = agentNeighbors[i].Value;
+                    AgentNeighbor otherAgent = agentNeighbors[neighborIdx].Value;
 
-                    float2 relativePosition = otherAgent.position - translations[entityID].Value.xz;
-                    float2 relativeVelocity = velocities[entityID].Value - otherAgent.velocity;
+                    float2 relativePosition = otherAgent.position - position;
+                    float2 relativeVelocity = velocity - otherAgent.velocity;
                     float distSqr = math.lengthsq(relativePosition);
-                    float combinedRadius = radius * 2.0f;
-                    float combinedRadiusSqr = math.pow(combinedRadius, 2);
-
+                    
                     Line line;
                     float2 u;
 
@@ -556,8 +371,6 @@ public class ORCASystem : JobComponentSystem {
                     else
                     {
                         //Collision
-                        float invTimeStep = 1.0f / dt;
-
                         float2 w = relativeVelocity - invTimeStep * relativePosition;
 
                         float wLength = math.length(w);
@@ -567,26 +380,26 @@ public class ORCASystem : JobComponentSystem {
                         u = (combinedRadius * invTimeStep - wLength) * wUnit;
                     }
 
-                    line.point = velocities[entityID].Value + 0.5f * u;
+                    line.point = velocity + 0.5f * u;
 
-                    orcaLines[i] = line;
+                    orcaLines[neighborIdx] = line;
                 }
                 
-                float2 optimalVel = velocities[entityID].Value;
+                float2 optimalVel = velocity;
                 float2 vel = float2.zero;
-                int lineFail = LinearProgram2(orcaLines, neighborsCount, velocities[entityID].maxSpeed, optimalVel, false, ref vel);
+                float maxSpeed = velocities[entityIdx].maxSpeed;
+                int lineFail = LinearProgram2(orcaLines, neighborsCount, maxSpeed, optimalVel, false, ref vel);
 
                 if (lineFail < neighborsCount)
                 {
-                    LinearProgram3(orcaLines, neighborsCount, nbObstacleLine, lineFail, velocities[entityID].maxSpeed, ref vel);
+                    LinearProgram3(orcaLines, neighborsCount, nbObstacleLine, lineFail, maxSpeed, ref vel);
                 }
                 
-                velocities[entityID] = new Velocity()
+                velocities[entityIdx] = new Velocity()
                 {
                     Value = vel,
-                    maxSpeed = velocities[entityID].maxSpeed
+                    maxSpeed = maxSpeed
                 };
-
             }
             
             quadrantKeys.Dispose();
