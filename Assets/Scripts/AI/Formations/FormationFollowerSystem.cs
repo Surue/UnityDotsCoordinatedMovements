@@ -16,29 +16,34 @@ public struct PairEntityFormation {
 public class FormationFollowerSystem : SystemBase {
     private EntityCommandBufferSystem ecbSystem;
 
+    //Timer specific
     private TimeRecorder timerRecoder;
-
+    static Stopwatch timer = new System.Diagnostics.Stopwatch();
+    private static double time = 0;
+    //Timer specific
+    
     protected override void OnCreate()
     {
         base.OnCreate();
 
         ecbSystem = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
         
+        //Timer specific
         timerRecoder = new TimeRecorder("FormationFollowerSystem");
+        //Timer specific
     }
-    static Stopwatch timer = new System.Diagnostics.Stopwatch();
-    private static double time = 0;
     protected override void OnUpdate()
     {
         var ecb = ecbSystem.CreateCommandBuffer().ToConcurrent();
 
         NativeList<PairEntityFormation> formations = new NativeList<PairEntityFormation>(Allocator.TempJob);
         
-        
+        //Timer specific
         Job.WithoutBurst().WithCode(() =>
         {
             timer.Start();
         }).Schedule();
+        //Timer specific
 
         //TODO To parallel, Use chunk to bind entity to formation
         Entities.ForEach((Entity entity, in Formation formation) =>
@@ -184,8 +189,7 @@ public class FormationFollowerSystem : SystemBase {
 
         ecbSystem.AddJobHandleForProducer(Dependency);
         
-        CompleteDependency();
-
+        //Timer specific
         Job.WithoutBurst().WithCode(() =>
         {
             double ticks = timer.ElapsedTicks;
@@ -196,5 +200,6 @@ public class FormationFollowerSystem : SystemBase {
             timer.Reset();
         }).Schedule();
         timerRecoder.RegisterTimeInMS(time);
+        //Timer specific
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Unity.Burst;
 using Unity.Collections;
@@ -20,6 +21,22 @@ public struct AgentNeighbor {
 [UpdateInGroup(typeof(AiGroup))]
 [UpdateAfter(typeof(VelocitySystem))]
 public class ORCASystem : JobComponentSystem {
+    
+    //Timer specific
+    private TimeRecorder timerRecoder;
+    static Stopwatch timer = new System.Diagnostics.Stopwatch();
+    private static double time = 0;
+    //Timer specific
+
+    protected override void OnCreate()
+    {
+        base.OnCreate();
+        
+        //Timer specific
+        timerRecoder = new TimeRecorder("ORCASystem");
+        //Timer specific
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool LinearProgram1(NativeArray<Line> lines, int lineNo, float radius, float2 optVelocity,
         bool directionOpt,
@@ -143,6 +160,7 @@ public class ORCASystem : JobComponentSystem {
         {
             if (!(Det(lines[i].direction, lines[i].point - result) > distance)) continue;
 
+            //TODO Remove this NativeList
             NativeList<Line> projectedLines = new NativeList<Line>(Allocator.Temp);
             for (int j = 0; j < nbObstacleLine; j++)
             {
@@ -196,8 +214,32 @@ public class ORCASystem : JobComponentSystem {
         return v1.x * v2.y - v1.y * v2.x;
     }
 
+    struct StartTimerJob : IJob {
+        public void Execute()
+        {
+            timer.Start();
+        }
+    }
+    
+    struct EndTimerJob : IJob {
+        public void Execute()
+        {
+            double ticks = timer.ElapsedTicks;
+            double milliseconds = (ticks / Stopwatch.Frequency) * 1000;
+            
+            time = milliseconds;
+            timer.Stop();
+            timer.Reset();
+        }
+    }
+    
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
+        //Timer specific
+        var startTimerJob = new StartTimerJob();
+        var handle = startTimerJob.Schedule(inputDeps);
+        //Timer specific
+
         EntityQuery query = GetEntityQuery(typeof(Velocity), ComponentType.ReadOnly<Translation>(),
             ComponentType.ReadOnly<ORCATag>());
 
@@ -216,7 +258,14 @@ public class ORCASystem : JobComponentSystem {
             dt = UnityEngine.Time.deltaTime,
         };
 
-        return orcaJob.Schedule(query, inputDeps);
+        var handle2 = orcaJob.Schedule(query, handle);
+        
+        //Timer specific
+        var endTimerJob = new EndTimerJob();
+        timerRecoder.RegisterTimeInMS(time);
+        //Timer specific
+
+        return endTimerJob.Schedule(handle2);
     }
 
     [BurstCompile]
