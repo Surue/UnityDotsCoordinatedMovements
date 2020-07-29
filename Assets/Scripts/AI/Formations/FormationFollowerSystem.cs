@@ -4,7 +4,6 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
-using Debug = UnityEngine.Debug;
 
 public struct PairEntityFormation {
     public Entity entity;
@@ -18,9 +17,10 @@ public class FormationFollowerSystem : SystemBase {
 
     //Timer specific
     private TimeRecorder timerRecoder;
-    static Stopwatch timer = new System.Diagnostics.Stopwatch();
+    static Stopwatch timer = new Stopwatch();
     private static double time = 0;
     //Timer specific
+    
     
     protected override void OnCreate()
     {
@@ -28,16 +28,21 @@ public class FormationFollowerSystem : SystemBase {
 
         ecbSystem = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
         
+        
         //Timer specific
         timerRecoder = new TimeRecorder("FormationFollowerSystem");
         //Timer specific
     }
+
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+    }
+
     protected override void OnUpdate()
     {
         var ecb = ecbSystem.CreateCommandBuffer().ToConcurrent();
 
-        NativeList<PairEntityFormation> formations = new NativeList<PairEntityFormation>(Allocator.TempJob);
-        
         //Timer specific
         Job.WithoutBurst().WithCode(() =>
         {
@@ -45,10 +50,14 @@ public class FormationFollowerSystem : SystemBase {
         }).Schedule();
         //Timer specific
 
+        EntityQuery formationQuery = GetEntityQuery(ComponentType.ReadOnly(typeof(Formation)));
+
+        NativeArray<PairEntityFormation> formations = new NativeArray<PairEntityFormation>(formationQuery.CalculateEntityCount(), Allocator.Persistent);
+
         //TODO To parallel, Use chunk to bind entity to formation
-        Entities.ForEach((Entity entity, in Formation formation) =>
+        Entities.ForEach((int entityInQueryIndex, Entity entity, in Formation formation) =>
         {
-            formations.Add(new PairEntityFormation()
+            formations[entityInQueryIndex] = new PairEntityFormation()
             {
                 entity = entity,
                 formation = new Formation()
@@ -63,8 +72,8 @@ public class FormationFollowerSystem : SystemBase {
                     speedForming = formation.speedForming,
                     state = Formation.State.FORMED
                 }
-            });
-        }).Schedule();
+            };
+        }).ScheduleParallel();
 
         Entities.WithReadOnly(formations).ForEach((
             Entity entity,
@@ -136,28 +145,26 @@ public class FormationFollowerSystem : SystemBase {
             in FormationFollower follower) =>
         {
             //Get target position
-            if (pathFollow.Value != -1)
+            if (pathFollow.Value == -1) return;
+            
+            //Get Formation
+            Formation formation = new Formation();
+            int i;
+            for (i = 0; i < formations.Length; i++)
             {
-                //Get Formation
-                Formation formation = new Formation();
-                int i;
-                for (i = 0; i < formations.Length; i++)
-                {
-                    if (formations[i].entity == follower.formationEntity)
-                    {
-                        formation = formations[i].formation;
-                        break;
-                    }
-                }
-
-                formation.state = Formation.State.FORMING;
-                formations[i] = new PairEntityFormation()
-                {
-                    entity = formations[i].entity,
-                    formation = formation
-                };
+                if (formations[i].entity != follower.formationEntity) continue;
+                    
+                formation = formations[i].formation;
+                break;
             }
-        }).Run();
+
+            formation.state = Formation.State.FORMING;
+            formations[i] = new PairEntityFormation()
+            {
+                entity = formations[i].entity,
+                formation = formation
+            };
+        }).Schedule();
 
         //Set speed for leader
         Entities.WithReadOnly(formations).ForEach((
@@ -185,8 +192,8 @@ public class FormationFollowerSystem : SystemBase {
             }
         }).ScheduleParallel();
 
-        Dependency = JobHandle.CombineDependencies(Dependency, formations.Dispose(Dependency));
-
+        JobHandle.CombineDependencies(Dependency, formations.Dispose(Dependency));
+        
         ecbSystem.AddJobHandleForProducer(Dependency);
         
         //Timer specific

@@ -468,6 +468,7 @@ MonoBehaviour:
   neighbors:
   - {fileID: 1369562866}
   - {fileID: 1644186245}
+  maxDistance: []
 --- !u!4 &151372158
 Transform:
   m_ObjectHideFlags: 0
@@ -520,6 +521,7 @@ MonoBehaviour:
   - {fileID: 382116046}
   - {fileID: 1674619082}
   - {fileID: 763647186}
+  maxDistance: []
 --- !u!4 &156119166
 Transform:
   m_ObjectHideFlags: 0
@@ -972,6 +974,7 @@ MonoBehaviour:
   - {fileID: 1657030108}
   - {fileID: 2019006359}
   - {fileID: 509057217}
+  maxDistance: []
 --- !u!4 &288079117
 Transform:
   m_ObjectHideFlags: 0
@@ -1093,6 +1096,7 @@ MonoBehaviour:
   - {fileID: 1086127245}
   - {fileID: 646829745}
   - {fileID: 2002985154}
+  maxDistance: []
 --- !u!4 &339943113
 Transform:
   m_ObjectHideFlags: 0
@@ -1215,6 +1219,7 @@ MonoBehaviour:
   - {fileID: 1186859515}
   - {fileID: 1213022170}
   - {fileID: 509057217}
+  maxDistance: []
 --- !u!4 &367479110
 Transform:
   m_ObjectHideFlags: 0
@@ -1267,6 +1272,7 @@ MonoBehaviour:
   - {fileID: 387900768}
   - {fileID: 1064187564}
   - {fileID: 568087006}
+  maxDistance: []
 --- !u!4 &382116047
 Transform:
   m_ObjectHideFlags: 0
@@ -1315,11 +1321,11 @@ MonoBehaviour:
   - {fileID: 1827384235}
   - {fileID: 382116046}
   - {fileID: 1910077579}
-  - {fileID: 387900768}
   - {fileID: 566955913}
   - {fileID: 1064187564}
   - {fileID: 1997399751}
   - {fileID: 2074513097}
+  maxDistance: []
 --- !u!4 &387900769
 Transform:
   m_ObjectHideFlags: 0
@@ -1333,6 +1339,55 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1165310258}
   m_RootOrder: 23
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &389639928
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 389639930}
+  - component: {fileID: 389639929}
+  m_Layer: 0
+  m_Name: Blackboard
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &389639929
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 389639928}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04e2030ca4e2388d48803d6d6b9f27a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  radius: 0.5
+  timeHorizon: 5
+  neighborsDist: 15
+  maxNeighbors: 10
+  maxSpeed: 5
+  quadrantSize: 15
+--- !u!4 &389639930
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 389639928}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 25.748539, y: 36.9375, z: 3.9292703}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 59
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &400960956
 PrefabInstance:
@@ -1610,6 +1665,7 @@ MonoBehaviour:
   - {fileID: 382116046}
   - {fileID: 387900768}
   - {fileID: 1827384235}
+  maxDistance: []
 --- !u!4 &448093892
 Transform:
   m_ObjectHideFlags: 0
@@ -1813,9 +1869,9 @@ MonoBehaviour:
   - {fileID: 881731582}
   - {fileID: 2147354156}
   - {fileID: 1201651507}
-  - {fileID: 509057217}
   - {fileID: 288079116}
   - {fileID: 652963696}
+  maxDistance: []
 --- !u!4 &509057218
 Transform:
   m_ObjectHideFlags: 0
@@ -1937,6 +1993,7 @@ MonoBehaviour:
   - {fileID: 448093891}
   - {fileID: 387900768}
   - {fileID: 1064187564}
+  maxDistance: []
 --- !u!4 &566955914
 Transform:
   m_ObjectHideFlags: 0
@@ -1985,11 +2042,11 @@ MonoBehaviour:
   - {fileID: 1186859515}
   - {fileID: 1910077579}
   - {fileID: 1213022170}
-  - {fileID: 568087006}
   - {fileID: 718587027}
   - {fileID: 382116046}
   - {fileID: 779543692}
   - {fileID: 901684738}
+  maxDistance: []
 --- !u!4 &568087007
 Transform:
   m_ObjectHideFlags: 0
@@ -2051,6 +2108,7 @@ MonoBehaviour:
   - {fileID: 1644186245}
   - {fileID: 1657030108}
   - {fileID: 2019006359}
+  maxDistance: []
 --- !u!1 &639965726
 GameObject:
   m_ObjectHideFlags: 0
@@ -2083,6 +2141,7 @@ MonoBehaviour:
   neighbors:
   - {fileID: 448093891}
   - {fileID: 1827384235}
+  maxDistance: []
 --- !u!4 &639965728
 Transform:
   m_ObjectHideFlags: 0
@@ -2288,6 +2347,7 @@ MonoBehaviour:
   - {fileID: 963607162}
   - {fileID: 339943112}
   - {fileID: 1916058103}
+  maxDistance: []
 --- !u!4 &646829746
 Transform:
   m_ObjectHideFlags: 0
@@ -2335,6 +2395,7 @@ MonoBehaviour:
   - {fileID: 2019006359}
   - {fileID: 2147354156}
   - {fileID: 509057217}
+  maxDistance: []
 --- !u!4 &652963697
 Transform:
   m_ObjectHideFlags: 0
@@ -2553,6 +2614,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   neighbors:
   - {fileID: 2002985154}
+  maxDistance: []
 --- !u!4 &705033139
 Transform:
   m_ObjectHideFlags: 0
@@ -2679,6 +2741,7 @@ MonoBehaviour:
   - {fileID: 1657030108}
   - {fileID: 568087006}
   - {fileID: 2019006359}
+  maxDistance: []
 --- !u!4 &718587028
 Transform:
   m_ObjectHideFlags: 0
@@ -2820,6 +2883,7 @@ MonoBehaviour:
   - {fileID: 448093891}
   - {fileID: 1827384235}
   - {fileID: 156119165}
+  maxDistance: []
 --- !u!4 &763647187
 Transform:
   m_ObjectHideFlags: 0
@@ -2872,6 +2936,7 @@ MonoBehaviour:
   - {fileID: 881731582}
   - {fileID: 2147354156}
   - {fileID: 1086127245}
+  maxDistance: []
 --- !u!4 &779543693
 Transform:
   m_ObjectHideFlags: 0
@@ -2993,6 +3058,7 @@ MonoBehaviour:
   - {fileID: 1064187564}
   - {fileID: 921539596}
   - {fileID: 2002985154}
+  maxDistance: []
 --- !u!4 &830918894
 Transform:
   m_ObjectHideFlags: 0
@@ -3038,6 +3104,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   neighbors:
   - {fileID: 2147354156}
+  maxDistance: []
 --- !u!4 &865643101
 Transform:
   m_ObjectHideFlags: 0
@@ -3090,6 +3157,7 @@ MonoBehaviour:
   - {fileID: 1956926453}
   - {fileID: 2147354156}
   - {fileID: 1195814747}
+  maxDistance: []
 --- !u!4 &881731583
 Transform:
   m_ObjectHideFlags: 0
@@ -3227,10 +3295,10 @@ MonoBehaviour:
   - {fileID: 1064187564}
   - {fileID: 568087006}
   - {fileID: 921539596}
-  - {fileID: 901684738}
   - {fileID: 2002985154}
   - {fileID: 646829745}
   - {fileID: 1086127245}
+  maxDistance: []
 --- !u!1001 &902836902
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3423,11 +3491,11 @@ MonoBehaviour:
   - {fileID: 1910077579}
   - {fileID: 901684738}
   - {fileID: 1997399751}
-  - {fileID: 921539596}
   - {fileID: 830918893}
   - {fileID: 2002985154}
   - {fileID: 962616656}
   - {fileID: 646829745}
+  maxDistance: []
 --- !u!4 &921539597
 Transform:
   m_ObjectHideFlags: 0
@@ -3474,6 +3542,7 @@ MonoBehaviour:
   neighbors:
   - {fileID: 921539596}
   - {fileID: 2002985154}
+  maxDistance: []
 --- !u!4 &962616657
 Transform:
   m_ObjectHideFlags: 0
@@ -3520,6 +3589,7 @@ MonoBehaviour:
   neighbors:
   - {fileID: 646829745}
   - {fileID: 2002985154}
+  maxDistance: []
 --- !u!4 &963607163
 Transform:
   m_ObjectHideFlags: 0
@@ -3799,12 +3869,12 @@ MonoBehaviour:
   - {fileID: 387900768}
   - {fileID: 1910077579}
   - {fileID: 901684738}
-  - {fileID: 1064187564}
   - {fileID: 1997399751}
   - {fileID: 921539596}
   - {fileID: 830918893}
   - {fileID: 382116046}
   - {fileID: 566955913}
+  maxDistance: []
 --- !u!4 &1064187565
 Transform:
   m_ObjectHideFlags: 0
@@ -3929,9 +3999,9 @@ MonoBehaviour:
   - {fileID: 779543692}
   - {fileID: 646829745}
   - {fileID: 339943112}
-  - {fileID: 1086127245}
   - {fileID: 1916058103}
   - {fileID: 1956926453}
+  maxDistance: []
 --- !u!4 &1086127246
 Transform:
   m_ObjectHideFlags: 0
@@ -4346,6 +4416,49 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ae914cff284b7dc89a956db0ec20d4b9, type: 3}
+--- !u!1 &1151444149
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1151444151}
+  - component: {fileID: 1151444150}
+  m_Layer: 0
+  m_Name: TimeRecorderManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1151444150
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1151444149}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03159b30ce23c02558385d75bd3aaa97, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &1151444151
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1151444149}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 69.66874, y: -133.54314, z: -57.34834}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 58
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1165310256
 GameObject:
   m_ObjectHideFlags: 0
@@ -4560,6 +4673,7 @@ MonoBehaviour:
   - {fileID: 1369562866}
   - {fileID: 1910077579}
   - {fileID: 367479109}
+  maxDistance: []
 --- !u!4 &1186859516
 Transform:
   m_ObjectHideFlags: 0
@@ -4606,6 +4720,7 @@ MonoBehaviour:
   neighbors:
   - {fileID: 881731582}
   - {fileID: 2147354156}
+  maxDistance: []
 --- !u!4 &1195814748
 Transform:
   m_ObjectHideFlags: 0
@@ -4652,6 +4767,7 @@ MonoBehaviour:
   neighbors:
   - {fileID: 509057217}
   - {fileID: 2147354156}
+  maxDistance: []
 --- !u!4 &1201651508
 Transform:
   m_ObjectHideFlags: 0
@@ -4701,10 +4817,10 @@ MonoBehaviour:
   - {fileID: 901684738}
   - {fileID: 1910077579}
   - {fileID: 367479109}
-  - {fileID: 1213022170}
   - {fileID: 646829745}
   - {fileID: 1086127245}
   - {fileID: 881731582}
+  maxDistance: []
 --- !u!4 &1213022171
 Transform:
   m_ObjectHideFlags: 0
@@ -5212,11 +5328,11 @@ MonoBehaviour:
   - {fileID: 718587027}
   - {fileID: 1186859515}
   - {fileID: 1728401946}
-  - {fileID: 1369562866}
   - {fileID: 1674619082}
   - {fileID: 1644186245}
   - {fileID: 151372157}
   - {fileID: 1657030108}
+  maxDistance: []
 --- !u!4 &1369562867
 Transform:
   m_ObjectHideFlags: 0
@@ -5341,6 +5457,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   neighbors:
   - {fileID: 1644186245}
+  maxDistance: []
 --- !u!4 &1482031377
 Transform:
   m_ObjectHideFlags: 0
@@ -5472,6 +5589,7 @@ MonoBehaviour:
   - {fileID: 1482031376}
   - {fileID: 1657030108}
   - {fileID: 606538957}
+  maxDistance: []
 --- !u!4 &1644186246
 Transform:
   m_ObjectHideFlags: 0
@@ -5522,9 +5640,9 @@ MonoBehaviour:
   - {fileID: 1929802583}
   - {fileID: 2019006359}
   - {fileID: 288079116}
-  - {fileID: 1657030108}
   - {fileID: 718587027}
   - {fileID: 606538957}
+  maxDistance: []
 --- !u!4 &1657030109
 Transform:
   m_ObjectHideFlags: 0
@@ -5725,6 +5843,7 @@ MonoBehaviour:
   - {fileID: 156119165}
   - {fileID: 1369562866}
   - {fileID: 1644186245}
+  maxDistance: []
 --- !u!4 &1674619083
 Transform:
   m_ObjectHideFlags: 0
@@ -5930,6 +6049,7 @@ MonoBehaviour:
   - {fileID: 156119165}
   - {fileID: 1827384235}
   - {fileID: 1369562866}
+  maxDistance: []
 --- !u!4 &1728401947
 Transform:
   m_ObjectHideFlags: 0
@@ -5982,6 +6102,7 @@ MonoBehaviour:
   - {fileID: 1728401946}
   - {fileID: 639965727}
   - {fileID: 387900768}
+  maxDistance: []
 --- !u!4 &1827384236
 Transform:
   m_ObjectHideFlags: 0
@@ -6108,6 +6229,7 @@ MonoBehaviour:
   - {fileID: 921539596}
   - {fileID: 1186859515}
   - {fileID: 1213022170}
+  maxDistance: []
 --- !u!4 &1910077580
 Transform:
   m_ObjectHideFlags: 0
@@ -6229,6 +6351,7 @@ MonoBehaviour:
   - {fileID: 881731582}
   - {fileID: 1086127245}
   - {fileID: 646829745}
+  maxDistance: []
 --- !u!4 &1916058104
 Transform:
   m_ObjectHideFlags: 0
@@ -6275,6 +6398,7 @@ MonoBehaviour:
   neighbors:
   - {fileID: 1644186245}
   - {fileID: 1657030108}
+  maxDistance: []
 --- !u!4 &1929802584
 Transform:
   m_ObjectHideFlags: 0
@@ -6401,6 +6525,7 @@ MonoBehaviour:
   - {fileID: 881731582}
   - {fileID: 2147354156}
   - {fileID: 1086127245}
+  maxDistance: []
 --- !u!4 &1956926454
 Transform:
   m_ObjectHideFlags: 0
@@ -6446,6 +6571,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   neighbors:
   - {fileID: 448093891}
+  maxDistance: []
 --- !u!4 &1991131105
 Transform:
   m_ObjectHideFlags: 0
@@ -6493,6 +6619,7 @@ MonoBehaviour:
   - {fileID: 387900768}
   - {fileID: 1064187564}
   - {fileID: 921539596}
+  maxDistance: []
 --- !u!4 &1997399752
 Transform:
   m_ObjectHideFlags: 0
@@ -6541,11 +6668,11 @@ MonoBehaviour:
   - {fileID: 901684738}
   - {fileID: 646829745}
   - {fileID: 830918893}
-  - {fileID: 2002985154}
   - {fileID: 962616656}
   - {fileID: 963607162}
   - {fileID: 705033138}
   - {fileID: 339943112}
+  maxDistance: []
 --- !u!4 &2002985155
 Transform:
   m_ObjectHideFlags: 0
@@ -6670,9 +6797,9 @@ MonoBehaviour:
   - {fileID: 779543692}
   - {fileID: 509057217}
   - {fileID: 652963696}
-  - {fileID: 2019006359}
   - {fileID: 288079116}
   - {fileID: 606538957}
+  maxDistance: []
 --- !u!4 &2019006360
 Transform:
   m_ObjectHideFlags: 0
@@ -6719,6 +6846,7 @@ MonoBehaviour:
   neighbors:
   - {fileID: 448093891}
   - {fileID: 387900768}
+  maxDistance: []
 --- !u!4 &2074513098
 Transform:
   m_ObjectHideFlags: 0
@@ -7073,11 +7201,11 @@ MonoBehaviour:
   - {fileID: 881731582}
   - {fileID: 779543692}
   - {fileID: 1956926453}
-  - {fileID: 2147354156}
   - {fileID: 1195814747}
   - {fileID: 865643100}
   - {fileID: 652963696}
   - {fileID: 1201651507}
+  maxDistance: []
 --- !u!4 &2147354157
 Transform:
   m_ObjectHideFlags: 0

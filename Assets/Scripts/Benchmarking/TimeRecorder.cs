@@ -46,6 +46,10 @@ public class TimeRecorder {
 
     public double GetLine(int index)
     {
+        if (index >= _times.Count)
+        {
+            return 0;
+        }
         return _times[index];
     }
 

@@ -8,7 +8,7 @@ public class FormationLeaderSystem : SystemBase {
     
     //Timer specific
     private TimeRecorder timerRecoder;
-    static Stopwatch timer = new System.Diagnostics.Stopwatch();
+    static Stopwatch timer = new Stopwatch();
     private static double time = 0;
     //Timer specific
     
@@ -41,7 +41,7 @@ public class FormationLeaderSystem : SystemBase {
                 formation.referentialPosition = localToWorld.Position.xz;
                 formation.referentialForward = localToWorld.Forward.xz;
                 
-                
+                //Doesn't allow for parrallel writing
                 SetComponent(leader.formationEntity, formation);
 
                 if (pathFollow.Value != -1)

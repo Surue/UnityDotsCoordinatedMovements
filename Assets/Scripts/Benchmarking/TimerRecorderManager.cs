@@ -46,7 +46,15 @@ public class TimerRecorderManager : MonoBehaviour {
                 }
                 file.Write(file.NewLine);
                 
-                int count = _timeRecorders[0].GetCount();
+                int count = 0;
+
+                for (int i = 0; i < _timeRecorders.Count; i++)
+                {
+                    if (_timeRecorders[i].GetCount() > count)
+                    {
+                        count = _timeRecorders[i].GetCount();
+                    }
+                }
 
                 for (int i = 0; i < count; i++)
                 {

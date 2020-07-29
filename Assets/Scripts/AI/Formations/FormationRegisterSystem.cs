@@ -1,33 +1,75 @@
+using System.Diagnostics;
+using Unity.Collections;
 using Unity.Entities;
 
 [UpdateInGroup(typeof(AiGroup), OrderFirst = true)]
 public class FormationRegisterSystem : SystemBase {
+    
+    private EntityCommandBufferSystem ecbSystem;
+    
+    //Timer specific
+    private TimeRecorder timerRecoder;
+    static Stopwatch timer = new Stopwatch();
+    private static double time = 0;
+    //Timer specific
+    
+    protected override void OnCreate()
+    {
+        base.OnCreate();
+        
+        ecbSystem = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
+        
+        //Timer specific
+        timerRecoder = new TimeRecorder("FormationRegisterSystem");
+        //Timer specific
+    }
+    
     protected override void OnUpdate()
     {
-        EntityManager em = EntityManager;
+        //Timer specific
+        Job.WithoutBurst().WithCode(() =>
+        {
+            timer.Start();
+        }).Schedule();
+        //Timer specific
 
-        //TODO To parallel
-        Entities.WithStructuralChanges().ForEach(
-            (Entity entity, FormationRegisterTag registerRequest, FormationLeader leader) =>
+        var ecb = ecbSystem.CreateCommandBuffer().ToConcurrent();
+        
+        Entities.ForEach(
+            (int entityInQueryIndex, Entity entity, in FormationLeader leader, in FormationRegisterTag registerRequest) =>
             {
                 //Update the formation
-                var formation = em.GetComponentData<Formation>(leader.formationEntity);
+                var formation = GetComponent<Formation>(leader.formationEntity);
                 formation.nbAgent++;
-                em.SetComponentData(leader.formationEntity, formation);
+                SetComponent(leader.formationEntity, formation);
 
-                em.RemoveComponent<FormationRegisterTag>(entity);
-            }).Run();
+                ecb.RemoveComponent<FormationRegisterTag>(entityInQueryIndex, entity);
+            }).Schedule();
 
-        //TODO To parallel
-        Entities.WithStructuralChanges().ForEach(
-            (Entity entity, FormationRegisterTag registerRequest, FormationFollower follower) =>
+        Entities.ForEach(
+            (int entityInQueryIndex, Entity entity, in FormationFollower follower, in FormationRegisterTag registerRequest) =>
             {
                 //Update the formation
-                var formation = em.GetComponentData<Formation>(follower.formationEntity);
+                var formation = GetComponent<Formation>(follower.formationEntity);
                 formation.nbAgent++;
-                em.SetComponentData(follower.formationEntity, formation);
+                SetComponent(follower.formationEntity, formation);
 
-                em.RemoveComponent<FormationRegisterTag>(entity);
-            }).Run();
+                ecb.RemoveComponent<FormationRegisterTag>(entityInQueryIndex, entity);
+            }).Schedule();
+
+        ecbSystem.AddJobHandleForProducer(Dependency);
+        
+        //Timer specific
+        Job.WithoutBurst().WithCode(() =>
+        {
+            double ticks = timer.ElapsedTicks;
+            double milliseconds = (ticks / Stopwatch.Frequency) * 1000;
+            time = milliseconds;
+            timer.Stop();
+            timer.Reset();
+        }).Schedule();
+        UnityEngine.Debug.Log(time);
+        timerRecoder.RegisterTimeInMS(time);
+        //Timer specific
     }
 }
