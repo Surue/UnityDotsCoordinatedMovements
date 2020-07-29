@@ -73,7 +73,7 @@ public class QuadrantSystem : JobComponentSystem {
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int GetPositionHashMapKey(float2 pos)
+    public static int GetPositionHashMapKey(float2 pos)
     {
         return (int) math.floor(pos.x / quadrantCellSize) +
                (int) (quadrantYMultiplier * math.floor(pos.y / quadrantCellSize));

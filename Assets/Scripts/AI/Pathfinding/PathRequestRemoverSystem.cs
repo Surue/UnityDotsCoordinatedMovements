@@ -1,27 +1,29 @@
 ﻿using System.Diagnostics;
 using Unity.Entities;
-using Unity.Mathematics;
-using Unity.Transforms;
 
 [UpdateInGroup(typeof(AiGroup))]
-[UpdateAfter(typeof(PathRequestRemoverSystem))]
-public class PathNextStepSystem : SystemBase {
+[UpdateAfter(typeof(PathFinderSystem))]
+public class PathRequestRemoverSystem : SystemBase {
+    
+    private EntityCommandBufferSystem ecbSystem;
     
     //Timer specific
     private TimeRecorder timerRecoder;
     static Stopwatch timer = new Stopwatch();
     private static double time = 0;
     //Timer specific
-
+    
     protected override void OnCreate()
     {
         base.OnCreate();
+
+        ecbSystem = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
         
         //Timer specific
-        timerRecoder = new TimeRecorder("PathNextStepSystem");
+        timerRecoder = new TimeRecorder("PathRequestRemoverSystem");
         //Timer specific
     }
-    
+
     protected override void OnUpdate()
     {
         //Timer specific
@@ -31,17 +33,14 @@ public class PathNextStepSystem : SystemBase {
         }).Schedule();
         //Timer specific
         
-        //Dynamic buffer must be at the start
-        Entities.ForEach((ref PathIndex pathFollow, in Translation position, in TargetPosition targetPosition) =>
-        {
-            //TODO Not good for //
-            if (pathFollow.Value == -1) return;
+        EntityCommandBuffer.Concurrent ecb = ecbSystem.CreateCommandBuffer().ToConcurrent();
 
-            if (math.distance(position.Value.xz, targetPosition.Value) < 0.55f)
-            {
-                pathFollow.Value--;
-            }
+        Entities.ForEach((int entityInQueryIndex, Entity entity, in PathFindingRequest pathFindingRequest) =>
+        {
+            ecb.RemoveComponent<PathFindingRequest>(entityInQueryIndex, entity);
         }).ScheduleParallel();
+
+        ecbSystem.AddJobHandleForProducer(Dependency);
         
         //Timer specific
         Job.WithoutBurst().WithCode(() =>

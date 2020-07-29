@@ -1,176 +1,169 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
+using Unity.Transforms;
 
 [UpdateInGroup(typeof(AiGroup))]
 [UpdateAfter(typeof(FormationFollowerSystem))]
-public class PathFinderSystem : SystemBase {
-    private EntityCommandBufferSystem ecbSystem;
-
+public class PathFinderSystem : JobComponentSystem {
     private WaypointGraph _waypointGraph;
+
+    //Timer specific
+    private TimeRecorder timerRecoder;
+    static Stopwatch timer = new System.Diagnostics.Stopwatch();
+
+    private static double time = 0;
+    //Timer specific
 
     protected override void OnCreate()
     {
         base.OnCreate();
 
-        ecbSystem = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
-
         _waypointGraph = WaypointGraph.Instance;
-    }
 
-    protected override void OnUpdate()
-    {
-        // var ecb = ecbSystem.CreateCommandBuffer().ToConcurrent();
-        NativeList<JobHandle> jobHandlesList = new NativeList<JobHandle>(Allocator.Temp);
-
-        if (_waypointGraph == null)
-        {
-            _waypointGraph = WaypointGraph.Instance;
-        }
-
-        //TODO Try to optimize
-        Entities.WithStructuralChanges().WithoutBurst().ForEach(
-            (Entity entity, int entityInQueryIndex, DynamicBuffer<PathPositions> pathPositionBuffer,
-                ref PathFindingRequest request, ref PathIndex pathFollow) =>
-            {
-                //use A* to find path
-                FindPathJob findPathJob = new FindPathJob()
-                {
-                    endPos = request.endPos,
-                    Neighbors = _waypointGraph.Neighbors,
-                    path = pathPositionBuffer,
-                    startPos = request.startPos,
-                    waypoints = _waypointGraph.Waypoints
-                };
-
-
-                // jobHandlesList.Add(findPathJob.Schedule());
-
-                //TODO optimize
-                findPathJob.Run();
-                pathFollow.Value = pathPositionBuffer.Length - 1;
-
-                //Remove path finding request from the entity
-                // ecb.RemoveComponent<PathFindingRequest>(entityInQueryIndex, entity);
-                EntityManager.RemoveComponent<PathFindingRequest>(entity);
-            }).Run();
-
-        // ecbSystem.AddJobHandleForProducer(Dependency);
-
-        JobHandle.CompleteAll(jobHandlesList);
-        jobHandlesList.Dispose();
-
-        // Dependency.Complete();
+        //Timer specific
+        timerRecoder = new TimeRecorder("PathFinderSystem");
+        //Timer specific
     }
 
     [BurstCompile]
-    struct FindPathJob : IJob {
-        [ReadOnly] public float2 startPos;
-        [ReadOnly] public float2 endPos;
+    struct FindPathJob2 : IJobChunk {
         [ReadOnly] public NativeArray<Waypoint> waypoints;
         [ReadOnly] public NativeArray<WaypointNeighbors> Neighbors;
-        [WriteOnly] public DynamicBuffer<PathPositions> path;
+        [ReadOnly] public ArchetypeChunkComponentType<PathFindingRequest> pathFindingRequestType;
+        public ArchetypeChunkBufferType<PathPositions> pathPositionType;
+        public ArchetypeChunkComponentType<PathIndex> pathIndexType;
 
-        public void Execute()
+        public void Execute(ArchetypeChunk chunk, int chunkIndex, int firstEntityIndex)
         {
-            //Create containers
-            //TODO put it outside and clean after finding path to optimize allocation
+            NativeArray<PathFindingRequest> chunkPathFindingRequest = chunk.GetNativeArray(pathFindingRequestType);
+            BufferAccessor<PathPositions> chunkPathPositions = chunk.GetBufferAccessor(pathPositionType);
+            NativeArray<PathIndex> chunkPathIndex = chunk.GetNativeArray(pathIndexType);
+
             NativeArray<int> cameFrom = new NativeArray<int>(waypoints.Length, Allocator.Temp);
             NativeArray<float> totalCost = new NativeArray<float>(waypoints.Length, Allocator.Temp);
-
-            for (int i = 0; i < totalCost.Length; i++)
-            {
-                totalCost[i] = float.MaxValue;
-            }
-
+            
             //TODO Change container to have something more optimized
             NativeList<int> openList = new NativeList<int>(Allocator.Temp);
             NativeList<int> closedList = new NativeList<int>(Allocator.Temp);
-
-            //Get start and end index
-            int startIndex = GetClosestNodeIndex(startPos);
-            int endIndex = GetClosestNodeIndex(endPos);
-
-            //Security if startIndex == endIndex
-            if (startIndex == endIndex)
+            
+            for (int entityIdx = 0; entityIdx < chunk.ChunkEntityCount; entityIdx++)
             {
-                path.Clear();
-                path.Add(new PathPositions()
+                for (int i = 0; i < waypoints.Length; i++)
                 {
-                    Value = endPos
-                });
-                path.Add(new PathPositions()
+                    cameFrom[i] = 0;
+                }
+                
+                for (int i = 0; i < totalCost.Length; i++)
                 {
-                    Value = waypoints[startIndex].position
-                });
-                return;
-            }
+                    totalCost[i] = float.MaxValue;
+                }
+                
+                openList.Clear();
+                closedList.Clear();
 
-            totalCost[startIndex] = 0;
-            openList.Add(startIndex);
+                //Get start and end index
+                int startIndex = GetClosestNodeIndex(chunkPathFindingRequest[entityIdx].startPos, waypoints);
+                int endIndex = GetClosestNodeIndex(chunkPathFindingRequest[entityIdx].endPos, waypoints);
 
-            int maxIteration = 20;
-
-            while (maxIteration-- > 0 && openList.Length > 0)
-            {
-                int currentIndex = 0;
-
-                //Get lowest cost node
-                float lowestCost = totalCost[openList[0]];
-
-                int indexToRemove = 0;
-                for (int i = 1; i < openList.Length; i++)
+                //Security if startIndex == endIndex
+                if (startIndex == endIndex)
                 {
-                    if (totalCost[openList[i]] < lowestCost)
+                    //Create new path
+                    chunkPathPositions[entityIdx].Clear();
+                    chunkPathPositions[entityIdx].Add(new PathPositions()
                     {
-                        lowestCost = totalCost[openList[i]];
-                        indexToRemove = i;
-                    }
+                        Value = chunkPathFindingRequest[entityIdx].endPos
+                    });
+                    chunkPathPositions[entityIdx].Add(new PathPositions()
+                    {
+                        Value = waypoints[startIndex].position
+                    });
+                    
+                    //Assign index 
+                    chunkPathIndex[entityIdx] = new PathIndex
+                    {
+                        Value = chunkPathPositions[entityIdx].Length - 1
+                    };
+                    return;
                 }
 
-                currentIndex = openList[indexToRemove];
-                openList.RemoveAt(indexToRemove);
+                totalCost[startIndex] = 0;
+                openList.Add(startIndex);
 
-                //Add to closed list
-                closedList.Add(currentIndex);
+                int maxIteration = 20;
 
-                //If the current node is the end node then the algorithm is finished 
-                if (currentIndex == endIndex)
+                while (maxIteration-- > 0 && openList.Length > 0)
                 {
-                    break;
-                }
+                    int currentIndex = 0;
 
-                //Check neighbors
-                for (int i = 0; i < waypoints[currentIndex].neigborCount; i++)
-                {
-                    int neighborLinkIndex = i + waypoints[currentIndex].firstNeighbors;
-                    int neighborIndex = Neighbors[neighborLinkIndex].neighborsIndex;
+                    //Get lowest cost node
+                    float lowestCost = totalCost[openList[0]];
 
-                    //Compute new cost
-                    float newCost =
-                        totalCost[currentIndex] + //Total cost
-                        Neighbors[neighborLinkIndex].moveCost + //Move cost
-                        math.distance(waypoints[neighborIndex].position, waypoints[endIndex].position); //Heuristic cost
-
-                    if (newCost < totalCost[neighborIndex])
+                    int indexToRemove = 0;
+                    for (int i = 1; i < openList.Length; i++)
                     {
-                        totalCost[neighborIndex] = newCost;
-                        cameFrom[neighborIndex] = currentIndex;
-
-                        if (!openList.Contains(neighborIndex))
+                        if (totalCost[openList[i]] < lowestCost)
                         {
-                            openList.Add(neighborIndex);
+                            lowestCost = totalCost[openList[i]];
+                            indexToRemove = i;
+                        }
+                    }
+
+                    currentIndex = openList[indexToRemove];
+                    openList.RemoveAt(indexToRemove);
+
+                    //Add to closed list
+                    closedList.Add(currentIndex);
+
+                    //If the current node is the end node then the algorithm is finished 
+                    if (currentIndex == endIndex)
+                    {
+                        break;
+                    }
+
+                    //Check neighbors
+                    for (int i = 0; i < waypoints[currentIndex].neigborCount; i++)
+                    {
+                        int neighborLinkIndex = i + waypoints[currentIndex].firstNeighbors;
+                        int neighborIndex = Neighbors[neighborLinkIndex].neighborsIndex;
+
+                        //Compute new cost
+                        float newCost =
+                            totalCost[currentIndex] + //Total cost
+                            Neighbors[neighborLinkIndex].moveCost + //Move cost
+                            math.distance(waypoints[neighborIndex].position,
+                                waypoints[endIndex].position); //Heuristic cost
+
+                        if (newCost < totalCost[neighborIndex])
+                        {
+                            totalCost[neighborIndex] = newCost;
+                            cameFrom[neighborIndex] = currentIndex;
+
+                            if (!openList.Contains(neighborIndex))
+                            {
+                                openList.Add(neighborIndex);
+                            }
                         }
                     }
                 }
+
+                //Calculate path
+
+                chunkPathPositions[entityIdx].Clear();
+                CreatePath(chunkPathPositions[entityIdx], cameFrom, endIndex, startIndex,
+                    chunkPathFindingRequest[entityIdx].endPos, waypoints);
+
+                chunkPathIndex[entityIdx] = new PathIndex
+                {
+                    Value = chunkPathPositions[entityIdx].Length - 1
+                };
             }
-
-            //Calculate path
-            CreatePath(cameFrom, endIndex, startIndex);
-
+            
             //Dispose every temporary allocated container
             cameFrom.Dispose();
             totalCost.Dispose();
@@ -178,8 +171,10 @@ public class PathFinderSystem : SystemBase {
             closedList.Dispose();
         }
 
+        //TODO use a native array => better performance i think
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void CreatePath(NativeArray<int> cameFrom, int endIndex, int startIndex)
+        void CreatePath(DynamicBuffer<PathPositions> path, NativeArray<int> cameFrom, int endIndex, int startIndex, float2 endPos,
+            NativeArray<Waypoint> waypoints)
         {
             //Clear path
             path.Clear();
@@ -208,7 +203,8 @@ public class PathFinderSystem : SystemBase {
             });
         }
 
-        int GetClosestNodeIndex(float2 pos)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        int GetClosestNodeIndex(float2 pos, NativeArray<Waypoint> waypoints)
         {
             float minDistance = math.distancesq(pos, waypoints[0].position);
 
@@ -225,5 +221,73 @@ public class PathFinderSystem : SystemBase {
 
             return index;
         }
+    }
+    
+    struct StartTimerJob : IJob {
+        public void Execute()
+        {
+            timer.Start();
+        }
+    }
+
+    struct EndTimerJob : IJob {
+        public void Execute()
+        {
+            double ticks = timer.ElapsedTicks;
+            double milliseconds = (ticks / Stopwatch.Frequency) * 1000;
+
+            time = milliseconds;
+            timer.Stop();
+            timer.Reset();
+        }
+    }
+
+    protected override JobHandle OnUpdate(JobHandle inputDeps)
+    {
+        //Timer specific
+        var startTimerJob = new StartTimerJob();
+        var handle = startTimerJob.Schedule(inputDeps);
+        //Timer specific
+
+        if (_waypointGraph == null)
+        {
+            _waypointGraph = WaypointGraph.Instance;
+        }
+
+        EntityQuery query = GetEntityQuery(ComponentType.ReadOnly(typeof(PathFindingRequest)));
+
+        if (query.CalculateEntityCount() == 0)
+        {
+            //Timer specific
+            var endTimerJob2 = new EndTimerJob();
+            timerRecoder.RegisterTimeInMS(time);
+            //Timer specific
+
+            return endTimerJob2.Schedule(handle);
+        }
+
+        ArchetypeChunkBufferType<PathPositions> pathPositionBufferChunk = GetArchetypeChunkBufferType<PathPositions>();
+        ArchetypeChunkComponentType<PathFindingRequest> pathFindingRequestChunk =
+            GetArchetypeChunkComponentType<PathFindingRequest>(true);
+        ArchetypeChunkComponentType<PathIndex> pathIndexChunk = GetArchetypeChunkComponentType<PathIndex>();
+
+        //Update quadrants data
+        FindPathJob2 findPathJob = new FindPathJob2()
+        {
+            waypoints = _waypointGraph.Waypoints,
+            Neighbors = _waypointGraph.Neighbors,
+            pathFindingRequestType = pathFindingRequestChunk,
+            pathPositionType = pathPositionBufferChunk,
+            pathIndexType = pathIndexChunk
+        };
+
+        var handle2 = findPathJob.Schedule(query, handle);
+
+        //Timer specific
+        var endTimerJob = new EndTimerJob();
+        timerRecoder.RegisterTimeInMS(time);
+        //Timer specific
+
+        return endTimerJob.Schedule(handle2);
     }
 }
