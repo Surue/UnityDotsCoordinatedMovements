@@ -68,7 +68,6 @@ public class FormationRegisterSystem : SystemBase {
             timer.Stop();
             timer.Reset();
         }).Schedule();
-        UnityEngine.Debug.Log(time);
         timerRecoder.RegisterTimeInMS(time);
         //Timer specific
     }

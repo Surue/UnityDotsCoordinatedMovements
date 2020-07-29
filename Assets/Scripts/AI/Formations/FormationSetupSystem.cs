@@ -1,4 +1,5 @@
-﻿using Unity.Collections;
+﻿using System.Diagnostics;
+using Unity.Collections;
 using Unity.Entities;
 
 public struct FormationSetupData {
@@ -13,60 +14,74 @@ public struct FormationSetupData {
 public class FormationSetupSystem : SystemBase
 {
     private EntityCommandBufferSystem ecbSystem;
+    
+    //Timer specific
+    private TimeRecorder timerRecoder;
+    static Stopwatch timer = new Stopwatch();
+    private static double time = 0;
+    //Timer specific
 
     protected override void OnCreate()
     {
         base.OnCreate();
         
         ecbSystem = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
+        
+        //Timer specific
+        timerRecoder = new TimeRecorder("FormationSetupSystem");
+        //Timer specific
     }
 
     protected override void OnUpdate()
     {
-        // var ecb = ecbSystem.CreateCommandBuffer().ToConcurrent();
-        
-        NativeList<FormationSetupData> formationEntityToSetup = new NativeList<FormationSetupData>(Allocator.TempJob);
+        var ecb = ecbSystem.CreateCommandBuffer().ToConcurrent();
 
-        bool needSetup = false;
+        var queries = GetEntityQuery(ComponentType.ReadOnly(typeof(FormationSetup)));
+
+        if (queries.CalculateEntityCount() == 0)
+        {
+            return;
+        }
         
-        Entities.WithStructuralChanges().WithoutBurst().ForEach((
+        //Timer specific
+        Job.WithoutBurst().WithCode(() =>
+        {
+            timer.Start();
+        }).Schedule();
+        //Timer specific
+        
+        NativeArray<FormationSetupData> formationEntityToSetup = new NativeArray<FormationSetupData>(queries.CalculateEntityCount(), Allocator.TempJob);
+
+        Entities.ForEach((
             Entity entity, 
             int entityInQueryIndex,
             in Formation formation, 
             in FormationSetup formationSetup) =>
         {
-            formationEntityToSetup.Add(new FormationSetupData()
+            formationEntityToSetup[entityInQueryIndex] = new FormationSetupData()
             {
                 entity = entity, formation = formation, setup = formationSetup, count = 1
-            });
+            };
 
-            EntityManager.RemoveComponent<FormationSetup>(entity);
-            // ecb.RemoveComponent<FormationSetup>(entityInQueryIndex, entity);
-            needSetup = true;
-        }).Run();
+            ecb.RemoveComponent<FormationSetup>(entityInQueryIndex, entity);
+        }).ScheduleParallel();
         
-
-        if (!needSetup)
-        {
-            formationEntityToSetup.Dispose();
-            return;
-        }
         
         //Update leaders
-        Entities.WithoutBurst().WithReadOnly(formationEntityToSetup).ForEach((in FormationLeader formationLeader) =>
-        {
-            for (int i = 0; i < formationEntityToSetup.Length; i++)
-            {
-                if (formationEntityToSetup[i].entity == formationLeader.formationEntity)
-                {
-                    //TODO Setup
-                    break;
-                }
-            }
-        }).Run();
+        // Entities.WithoutBurst().WithReadOnly(formationEntityToSetup).ForEach((in FormationLeader formationLeader) =>
+        // {
+        //     for (int i = 0; i < formationEntityToSetup.Length; i++)
+        //     {
+        //         if (formationEntityToSetup[i].entity == formationLeader.formationEntity)
+        //         {
+        //             //TODO Setup
+        //             break;
+        //         }
+        //     }
+        // }).Run();
         
         //Update followers
-        Entities.WithoutBurst().ForEach((ref FormationFollower follower, ref Velocity velocity) =>
+        Entities.WithDeallocateOnJobCompletion(formationEntityToSetup).ForEach((ref FormationFollower follower, ref Velocity velocity) =>
         {
             for (int i = 0; i < formationEntityToSetup.Length; i++)
             {
@@ -84,8 +99,20 @@ public class FormationSetupSystem : SystemBase
                     break;
                 }
             }
-        }).Run();
+        }).Schedule();
         
-        formationEntityToSetup.Dispose();
+        ecbSystem.AddJobHandleForProducer(Dependency);
+        
+        //Timer specific
+        Job.WithoutBurst().WithCode(() =>
+        {
+            double ticks = timer.ElapsedTicks;
+            double milliseconds = (ticks / Stopwatch.Frequency) * 1000;
+            time = milliseconds;
+            timer.Stop();
+            timer.Reset();
+        }).Schedule();
+        timerRecoder.RegisterTimeInMS(time);
+        //Timer specific
     }
 }
