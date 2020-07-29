@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -6,6 +7,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 public struct QuadrantData {
     public QuadrantData(float2 pos, float2 vel)
@@ -25,11 +27,21 @@ public class QuadrantSystem : JobComponentSystem {
     const int quadrantYMultiplier = 1000;
     const float quadrantCellSize = 15.0f;
     const float neighborsCellDistance = quadrantCellSize / 2.0f;
+    
+    //Timer specific
+    private TimeRecorder timerRecoder;
+    static Stopwatch timer = new System.Diagnostics.Stopwatch();
+    private static double time = 0;
+    //Timer specific
 
     protected override void OnCreate()
     {
         base.OnCreate();
         quadrantMultiHashMap = new NativeMultiHashMap<int, QuadrantData>(0, Allocator.Persistent);
+        
+        //Timer specific
+        timerRecoder = new TimeRecorder("QuadrantSystem");
+        //Timer specific
     }
 
     protected override void OnDestroy()
@@ -61,7 +73,7 @@ public class QuadrantSystem : JobComponentSystem {
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int GetPositionHashMapKey(float2 pos)
+    private static int GetPositionHashMapKey(float2 pos)
     {
         return (int) math.floor(pos.x / quadrantCellSize) +
                (int) (quadrantYMultiplier * math.floor(pos.y / quadrantCellSize));
@@ -154,9 +166,33 @@ public class QuadrantSystem : JobComponentSystem {
     {
         return v1.x * v2.y - v1.y * v2.y;
     }
+    
+    struct StartTimerJob : IJob {
+        public void Execute()
+        {
+            timer.Start();
+        }
+    }
+    
+    struct EndTimerJob : IJob {
+        public void Execute()
+        {
+            double ticks = timer.ElapsedTicks;
+            double milliseconds = (ticks / Stopwatch.Frequency) * 1000;
+            
+            time = milliseconds;
+            timer.Stop();
+            timer.Reset();
+        }
+    }
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
+        //Timer specific
+        var startTimerJob = new StartTimerJob();
+        var handle = startTimerJob.Schedule(inputDeps);
+        //Timer specific
+        
         EntityQuery query = GetEntityQuery(typeof(Translation), typeof(Velocity));
 
         quadrantMultiHashMap.Clear();
@@ -175,7 +211,14 @@ public class QuadrantSystem : JobComponentSystem {
             velocityType = velocityChunk,
             quadrantHashMap = quadrantMultiHashMap.AsParallelWriter()
         };
+        
+        var handle2 = setQuadrantData.Schedule(query, handle);
+        
+        //Timer specific
+        var endTimerJob = new EndTimerJob();
+        timerRecoder.RegisterTimeInMS(time);
+        //Timer specific
 
-        return setQuadrantData.Schedule(query, inputDeps);
+        return endTimerJob.Schedule(handle2);
     }
 }
