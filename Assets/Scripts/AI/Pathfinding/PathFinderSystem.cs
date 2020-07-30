@@ -95,9 +95,7 @@ public class PathFinderSystem : JobComponentSystem {
                 totalCost[startIndex] = 0;
                 openList.Add(startIndex);
 
-                int maxIteration = 20;
-
-                while (maxIteration-- > 0 && openList.Length > 0)
+                while (openList.Length > 0)
                 {
                     int currentIndex = 0;
 
@@ -107,11 +105,10 @@ public class PathFinderSystem : JobComponentSystem {
                     int indexToRemove = 0;
                     for (int i = 1; i < openList.Length; i++)
                     {
-                        if (totalCost[openList[i]] < lowestCost)
-                        {
-                            lowestCost = totalCost[openList[i]];
-                            indexToRemove = i;
-                        }
+                        if (!(totalCost[openList[i]] < lowestCost)) continue;
+                        
+                        lowestCost = totalCost[openList[i]];
+                        indexToRemove = i;
                     }
 
                     currentIndex = openList[indexToRemove];
@@ -139,15 +136,14 @@ public class PathFinderSystem : JobComponentSystem {
                             math.distance(waypoints[neighborIndex].position,
                                 waypoints[endIndex].position); //Heuristic cost
 
-                        if (newCost < totalCost[neighborIndex])
-                        {
-                            totalCost[neighborIndex] = newCost;
-                            cameFrom[neighborIndex] = currentIndex;
+                        if (!(newCost < totalCost[neighborIndex])) continue;
+                        
+                        totalCost[neighborIndex] = newCost;
+                        cameFrom[neighborIndex] = currentIndex;
 
-                            if (!openList.Contains(neighborIndex))
-                            {
-                                openList.Add(neighborIndex);
-                            }
+                        if (!openList.Contains(neighborIndex))
+                        {
+                            openList.Add(neighborIndex);
                         }
                     }
                 }
@@ -174,7 +170,7 @@ public class PathFinderSystem : JobComponentSystem {
         //TODO use a native array => better performance i think
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void CreatePath(DynamicBuffer<PathPositions> path, NativeArray<int> cameFrom, int endIndex, int startIndex, float2 endPos,
-            NativeArray<Waypoint> waypoints)
+            [ReadOnly]NativeArray<Waypoint> waypoints)
         {
             //Clear path
             path.Clear();
@@ -204,7 +200,7 @@ public class PathFinderSystem : JobComponentSystem {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        int GetClosestNodeIndex(float2 pos, NativeArray<Waypoint> waypoints)
+        int GetClosestNodeIndex(float2 pos, [ReadOnly]NativeArray<Waypoint> waypoints)
         {
             float minDistance = math.distancesq(pos, waypoints[0].position);
 
@@ -212,11 +208,10 @@ public class PathFinderSystem : JobComponentSystem {
             for (int i = 1; i < waypoints.Length; i++)
             {
                 float distance = math.distancesq(pos, waypoints[i].position);
-                if (distance < minDistance)
-                {
-                    minDistance = distance;
-                    index = i;
-                }
+                if (!(distance < minDistance)) continue;
+                
+                minDistance = distance;
+                index = i;
             }
 
             return index;
@@ -234,7 +229,7 @@ public class PathFinderSystem : JobComponentSystem {
         public void Execute()
         {
             double ticks = timer.ElapsedTicks;
-            double milliseconds = (ticks / Stopwatch.Frequency) * 1000;
+            double milliseconds = ticks / Stopwatch.Frequency * 1000;
 
             time = milliseconds;
             timer.Stop();

@@ -34,6 +34,11 @@ public class WaypointEditor : MonoBehaviour {
 
     private void OnValidate()
     {
+        Check();
+    }
+
+    public void Check()
+    {
         if (neighbors != null)
         {
             //remove an neighbors 
@@ -77,7 +82,7 @@ public class WaypointEditor : MonoBehaviour {
                     neighbors.RemoveAt(i);
                 }
             }
-        }
+        }   
     }
 
     public void RemoveNeighbors(WaypointEditor waypointEditor)
@@ -101,7 +106,7 @@ public class WaypointEditor : MonoBehaviour {
         }
     }
 
-    private void OnDrawGizmos()
+    private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
         Handles.color = Color.red;
@@ -118,25 +123,8 @@ public class WaypointEditor : MonoBehaviour {
                 Vector3 perp = new Vector3(dir.z, 0, -dir.x);
                 Handles.DrawDottedLine(transform.position + perp * 0.1f,
                     waypointEditor.transform.position + perp * 0.1f, 10);
-            }
-        }
-    }
 
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.blue;
-
-        if (neighbors != null)
-        {
-            for (var index = 0; index < neighbors.Count; index++)
-            {
-                var waypointEditor = neighbors[index];
-                if (waypointEditor == null) continue;
-                Vector3 dir = waypointEditor.transform.position - transform.position;
-                dir.Normalize();
-                Vector3 perp = new Vector3(dir.z, 0, -dir.x);
-
-                if (maxDistance == null) continue;
+                if (maxDistance == null || maxDistance.Count == 0) continue;
                 Vector3 bottomLeft = transform.position - perp * maxDistance[index];
                 Vector3 bottomRight = waypointEditor.transform.position - perp * maxDistance[index];
                 Vector3 topRight = waypointEditor.transform.position + perp * maxDistance[index];
