@@ -27,7 +27,7 @@ public class QuadrantSystem : JobComponentSystem {
     const int quadrantYMultiplier = 1000;
     const float quadrantCellSize = 15.0f;
     const float neighborsCellDistance = quadrantCellSize / 2.0f;
-    
+
     //Timer specific
     private TimeRecorder timerRecoder;
     static Stopwatch timer = new System.Diagnostics.Stopwatch();

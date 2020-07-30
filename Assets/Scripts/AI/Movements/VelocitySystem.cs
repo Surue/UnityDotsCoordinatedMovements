@@ -4,7 +4,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 
 [UpdateInGroup(typeof(AiGroup))]
-[UpdateAfter(typeof(QuadrantSystem))]
+[UpdateAfter(typeof(CollisionDetector))]
 public class VelocitySystem : SystemBase {
     
     //Timer specific

@@ -23,7 +23,7 @@ public class Simulation1Runner : MonoBehaviour {
     [SerializeField] private int maxTimeFuture = 50;
     
     enum State : uint {
-        IDLE,
+        DEFAULT,
         DISTANCE_NEIGHBORS,
         MAX_NEEIGHBORS,    
         SIZE_CELL,
@@ -32,7 +32,7 @@ public class Simulation1Runner : MonoBehaviour {
         SHAPE,
     }
 
-    private State _state = State.DISTANCE_NEIGHBORS;
+    private State _state = State.DEFAULT;
 
     private float testedValue;
 
@@ -82,6 +82,9 @@ public class Simulation1Runner : MonoBehaviour {
         {
             switch (_state)
             {
+                case State.DEFAULT:
+                    _state = State.DISTANCE_NEIGHBORS;
+                    break;
                 case State.DISTANCE_NEIGHBORS:
                     _state = State.MAX_NEEIGHBORS;
                     break;
@@ -108,6 +111,9 @@ public class Simulation1Runner : MonoBehaviour {
         }
         switch (_state)
         {
+            case State.DEFAULT:
+                testedValue = currentTestIndex;
+                break;
             case State.DISTANCE_NEIGHBORS:
             {
                 float newValue = LerpValue(minDistance, maxDistance, currentTestIndex / (float) NB_STEP_PER_TEST);
@@ -169,6 +175,8 @@ public class Simulation1Runner : MonoBehaviour {
     {
         switch (state)
         {
+            case State.DEFAULT:
+                return "default";
             case State.DISTANCE_NEIGHBORS:
                 return "distanceNeighbors";
             case State.MAX_NEEIGHBORS:

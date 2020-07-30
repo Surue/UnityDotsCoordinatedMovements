@@ -280,7 +280,7 @@ public class ORCASystem : JobComponentSystem {
         public float invTimeHorizon;
         public float dt;
 
-        private const int MAX_QUADRANT_NEIGHBORS = 4;
+        private const int MAX_QUADRANT_NEIGHBORS = 9;
 
         public void Execute(ArchetypeChunk chunk, int chunkIndex, int firstEntityIndex)
         {
@@ -316,7 +316,6 @@ public class ORCASystem : JobComponentSystem {
                 int neighborsCount = 0;
 
                 int nbObstacleLine = 0;
-                float2 currentPos = position;
 
                 //Get nearest neighbors
                 for (int i = 0; i < countNeighborQuadrant; i++)
@@ -326,12 +325,12 @@ public class ORCASystem : JobComponentSystem {
                         continue;
                     do
                     {
-                        //TODO use better condition
-                        if (math.distancesq(neighbor.position, currentPos) > 0.001f)
+                        float2 dir = position - neighbor.position;
+                        float distSqr = math.dot(dir, dir);
+                        
+                        //Condition to avoid self
+                        if (distSqr > 0.001f)
                         {
-                            float2 dir = currentPos - neighbor.position;
-                            float distSqr = math.dot(dir, dir);
-
                             //If the other agent is under the minimum range => add it
                             if (!(distSqr < rangeSqr)) continue;
 
