@@ -24,14 +24,14 @@ public class TimerRecorderManager : MonoBehaviour {
         _timeRecorders = new List<TimeRecorder>();
     }
 
-    private void OnDestroy()
+    public void Dump(string fileName)
     {
 
 
         try
         {
             
-            using (System.IO.StreamWriter file = new StreamWriter("/home/surue/Documents/SAE/Bachelor/test.csv", false))
+            using (System.IO.StreamWriter file = new StreamWriter("/home/surue/Documents/SAE/Bachelor/"+fileName+".csv", false))
             {
 
                 file.Write("Name,");

@@ -52,12 +52,16 @@ public class FormationSetupSystem : SystemBase
         
         NativeArray<FormationSetupData> formationEntityToSetup = new NativeArray<FormationSetupData>(queries.CalculateEntityCount(), Allocator.TempJob);
 
+        float maxSpeed = Blackboard.Instance.MaxSpeed;
+        
         Entities.ForEach((
             Entity entity, 
             int entityInQueryIndex,
-            in Formation formation, 
+            ref Formation formation, 
             in FormationSetup formationSetup) =>
         {
+            formation.speedFormed = maxSpeed;
+            
             formationEntityToSetup[entityInQueryIndex] = new FormationSetupData()
             {
                 entity = entity, formation = formation, setup = formationSetup, count = 1
