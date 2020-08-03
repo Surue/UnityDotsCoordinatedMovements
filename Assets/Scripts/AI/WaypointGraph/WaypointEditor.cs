@@ -105,7 +105,8 @@ public class WaypointEditor : MonoBehaviour {
             waypointEditor.RemoveNeighbors(this);
         }
     }
-
+    
+#if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
@@ -137,4 +138,5 @@ public class WaypointEditor : MonoBehaviour {
             }
         }
     }
+#endif
 }

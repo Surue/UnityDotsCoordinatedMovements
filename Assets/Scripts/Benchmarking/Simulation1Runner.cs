@@ -102,6 +102,8 @@ public class Simulation1Runner : MonoBehaviour {
                     break;
                 case State.SHAPE:
                 {
+                    Destroy(this);
+                    Debug.Log("FINISHED");
                     Application.Quit();
                 }
                     break;

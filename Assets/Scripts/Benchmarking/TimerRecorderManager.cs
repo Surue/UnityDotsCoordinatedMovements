@@ -28,8 +28,6 @@ public class TimerRecorderManager : MonoBehaviour {
 
     public void Dump(string fileName)
     {
-
-
         try
         {
             
@@ -46,6 +44,7 @@ public class TimerRecorderManager : MonoBehaviour {
                         file.Write(",");
                     }
                 }
+                file.Write(",Collision");
                 file.Write(file.NewLine);
                 
                 int count = 0;
@@ -57,7 +56,7 @@ public class TimerRecorderManager : MonoBehaviour {
                         count = _timeRecorders[i].GetCount();
                     }
                 }
-
+                var collision = CollisionCounter.collisions;
                 for (int i = 0; i < count; i++)
                 {
                     file.Write(i + ",");
@@ -71,9 +70,15 @@ public class TimerRecorderManager : MonoBehaviour {
                             file.Write(",");
                         }
                     }
+
+                    if (i < collision.Length)
+                    {
+                        var keyValuePair = collision[i];
+                        file.Write(","+keyValuePair);
+                    }
                     file.Write(file.NewLine);
                 }
-                
+
                 //Line of calculus
                 file.Write("Average");
                 for (int i = 0; i < _timeRecorders.Count; i++)
@@ -95,15 +100,16 @@ public class TimerRecorderManager : MonoBehaviour {
                 file.Write(file.NewLine);
                 
                 //Collision writing
-                file.Write("CollisionFrame,CollisionPercentage");
-                file.Write(file.NewLine);
-                var collision = CollisionCounter.collisions;
-
-                foreach (var keyValuePair in collision)
-                {
-                    file.Write(keyValuePair.Key + "," + keyValuePair.Value);
-                    file.Write(file.NewLine);
-                }
+                // file.Write("CollisionFrame,CollisionPercentage");
+                // file.Write(file.NewLine);
+                // var collision = CollisionCounter.collisions;
+                //
+                // for (var index = 0; index < collision.Length; index++)
+                // {
+                //     var keyValuePair = collision[index];
+                //     file.Write(index + "," + keyValuePair);
+                //     file.Write(file.NewLine);
+                // }
             }
         }
         catch (Exception e)
@@ -111,13 +117,15 @@ public class TimerRecorderManager : MonoBehaviour {
             throw new ApplicationException("Ooops", e);
         }
 
+        CollisionDetector.key = 0;
+
         // positionCollision = CollisionCounter.positions;
         //
         // foreach (var float2 in positionCollision)
         // {
         //      Instantiate(collisionMarker, new Vector3(float2.x, 0, float2.y), Quaternion.identity);
         // }
-        
+
         // Debug.Break();
     }
 

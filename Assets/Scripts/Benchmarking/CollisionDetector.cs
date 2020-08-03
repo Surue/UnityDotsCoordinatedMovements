@@ -24,6 +24,8 @@ public class CollisionDetector : JobComponentSystem {
     {
         base.OnCreate();
 
+        key = 0;
+
         ecbSystem = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
     }
 
@@ -112,9 +114,10 @@ public class CollisionDetector : JobComponentSystem {
     }
 }
 
+[UpdateInGroup(typeof(AiGroup))]
 [UpdateAfter(typeof(CollisionDetector))]
 public class CollisionCounter : SystemBase {
-    [ReadOnly] public static NativeList<KeyValuePair<int, float>> collisions;
+    [ReadOnly] public static NativeList<int> collisions;
     public static NativeList<float2> positions;
     
     private EntityCommandBufferSystem ecbSystem;
@@ -123,7 +126,7 @@ public class CollisionCounter : SystemBase {
     {
         base.OnCreate();
         
-        collisions = new NativeList<KeyValuePair<int, float>>(Allocator.Persistent);
+        collisions = new NativeList<int>(Allocator.Persistent);
         positions = new NativeList<float2>(Allocator.Persistent);
         
         ecbSystem = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
@@ -142,10 +145,11 @@ public class CollisionCounter : SystemBase {
         EntityCommandBuffer ecb = ecbSystem.CreateCommandBuffer();
 
         var test = collisions;
+        test.Add(0);
         
         Entities.ForEach((Entity entity, in Collision collision) =>
         {
-            test.Add(new KeyValuePair<int, float>(collision.frame, collision.percentage));
+            test[test.Length - 1]++;
             positions.Add(collision.position);
             ecb.DestroyEntity(entity);
             
